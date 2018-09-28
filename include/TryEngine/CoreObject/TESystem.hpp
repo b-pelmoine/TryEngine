@@ -1,41 +1,85 @@
 #ifndef TERO_SYSTEM_HPP
 #define TERO_SYSTEM_HPP
 
-#include "TEEntity.hpp"
+#include "TESerializable.hpp"
+#include <unordered_map>
+#include <vector>
+#include <algorithm>
 #include <memory>
+#include <functional>
 
-class TESystem {
+using TESystemType = std::string;
+using TESystemID = Json::LargestUInt;
+
+class TESystem : public TESerializable
+{
+    static std::unordered_map<TESystemType, std::function<std::weak_ptr<TESystem>(TESystemID)>> registeredSystems;
     public:
-    virtual void Update() = 0;
+    TESystem(Json::LargestUInt ID): m_id(ID) {};
+    virtual ~TESystem() {};
+    virtual TESystemType Type() const =0;
+    virtual TESystemID ID() const { return m_id; };
+    virtual void Update() {};
+
+    private:
+    TESystemID m_id;
+
+    friend class UserDefinedTypes;
+    template<class S>
+    friend class TESystems;
+    friend class TEWorld;
 };
 
-template<class System>
+template<class S>
 class TESystems 
 {
-    public: 
-    TESystems(size_t size = 1000);
-    System& Create(TEEntity& entity);
-    void Remove(TEEntity entity);
-protected: // can add algos in derived classes
-    std::vector<System> m_components{};   // not sorted array
+public:
+    static std::weak_ptr<S> Create(bool overrideID = false, Json::LargestUInt ID = 0);
+    static void Remove(std::weak_ptr<S> system);
+private: 
+    TESystems(size_t size = 1024);
+    static std::vector<std::shared_ptr<S>> m_systems;
+
+    friend class UserDefinedTypes;
 };
 
-template<class System>
-TESystems<System>::TESystems(size_t size) {
-    m_components.reserve(size);
+template<class S>
+std::vector<std::shared_ptr<S>> TESystems<S>::m_systems;
+
+template<class S>
+TESystems<S>::TESystems(size_t size) {
+    m_systems.reserve(size);
+}
+template<class S>
+std::weak_ptr<S> TESystems<S>::Create(bool overrideID, Json::LargestUInt ID) {
+    Json::LargestUInt newID;
+    typename std::vector<std::shared_ptr<S>>::iterator Iterator;
+    if(overrideID)
+    {
+        newID = ID;
+        m_systems.push_back(
+            std::make_shared<S>(S(newID))
+            );
+        Iterator = std::prev(m_systems.end());
+    }
+    else
+    {
+        const auto it = std::adjacent_find(m_systems.begin(), m_systems.end(), 
+        [](std::shared_ptr<S> lhs,std::shared_ptr<S> rhs)
+        { return ((lhs->ID())+1 != rhs->ID()); });
+        newID = (it == m_systems.end()) ? m_systems.size() : (*it)->ID()+1;
+        Iterator = m_systems.insert(
+            it,
+            std::make_shared<S> (S(newID))
+            );
+    }
+    return *(Iterator);
 }
 
-template<class System>
-System& TESystems<System>::Create(TEEntity& entity) {
-    m_components.push_back(System(entity));
-    return m_components.back();
-}
-
-template<class System>
-void TESystems<System>::Remove(TEEntity entity) {
-    auto it = std::remove_if(begin(m_components), end(m_components), 
-        [entity](const System& component){ return (component.Entity() == entity); });
-    m_components.erase(it, m_components.end());
+template<class S>
+void TESystems<S>::Remove(std::weak_ptr<S> system) {
+    assert(!system.expired());
+    m_systems.erase(system.lock());
 }
 
 #endif
