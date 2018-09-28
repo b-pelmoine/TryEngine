@@ -7,10 +7,12 @@
 #include <memory>
 #include <algorithm>
 
+#include "json/json.h"
+
 class TEComponent;
 using TEComponentType = std::string;
 
-using TEEntityID = size_t;
+using TEEntityID = Json::LargestUInt;
 
 class TEEntity
 {
@@ -22,23 +24,27 @@ class TEEntity
     std::optional<std::weak_ptr<TEComponent>> GetComponent(TEComponentType type) const;
 
     private: 
-    TEEntity(TEEntityID id) : m_id(id) {};
+    TEEntity(TEEntityID id);
     TEEntityID m_id;
 
     void AddComponent(std::weak_ptr<TEComponent> component);
     void RemoveComponent(std::weak_ptr<TEComponent> component);
+
+    Json::Value Serialize() const;
+    void Load(Json::Value&& data, std::weak_ptr<TEEntity> self);
 
     std::unordered_map<TEComponentType, std::weak_ptr<TEComponent>> m_components;
 
     friend class TEEntities;
     template<typename T>
     friend class TEComponents;
+    friend class TEWorld;
 };
 
 class TEEntities
 {
 public:
-    std::weak_ptr<TEEntity> Create();
+    std::weak_ptr<TEEntity> Create(bool overrideID = false, Json::LargestUInt ID = 0);
     void Remove(std::weak_ptr<TEEntity> entity);
 private:
     struct Less {
@@ -48,6 +54,11 @@ private:
         }
     };
     std::set<std::shared_ptr<TEEntity>, Less> m_entities;
+
+    void Load(Json::Value&& rawEntities);
+
+    friend class TEWorldStream;
+    friend class TEWorld;
 };
 
 #endif
