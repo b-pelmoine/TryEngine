@@ -12,7 +12,7 @@ LIBS= -lopengl32 -lsfml-graphics -lsfml-window -lsfml-audio -lsfml-network -lsfm
 # Directories
 SRCTRYENGINEMODULES= CoreObject System Window 
 SRCTRYENGINE= $(foreach sdir, $(SRCTRYENGINEMODULES), TryEngine/$(sdir))
-SRCMODULES= $(SRCTRYENGINE) Modules
+SRCMODULES= $(SRCTRYENGINE) Modules Components Systems
 SRCDIR= src $(foreach sdir, $(SRCMODULES), src/$(sdir)) 
 #src src/Utilities src/TryEngine/CoreObject
 OBJDIR=obj

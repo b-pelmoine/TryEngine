@@ -1,5 +1,5 @@
-#ifndef TERO_TRYENGINE_HPP
-#define TERO_TRYENGINE_HPP
+#ifndef TERO_COREMINIMAL_HPP
+#define TERO_COREMINIMAL_HPP
 
 #include "CoreObject/TEEntity.hpp"
 #include "CoreObject/TEComponent.hpp"
