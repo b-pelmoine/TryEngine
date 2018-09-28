@@ -8,21 +8,35 @@
 
 #include <iostream>
 
+TryEngine TE;
 
-TryEngine::TryEngine(int argc, char** argv) :
+TryEngine::TryEngine():
 m_windowHandler(nullptr), m_moduleHandler(std::make_shared<TEModuleHandler>())
-{
-    ParseArgs(argc, argv);
+{}
 
+void TryEngine::Launch(int argc, char** argv)
+{
     //Register all modules
     m_moduleHandler->RegisterModule(DiscordHandler::ID(), DiscordHandler::Create());
+
+    //Register all user defined types
+    m_definedTypes.RegisterAllComponents();
+    m_definedTypes.RegisterAllSystems();
 
     //Load configuration file
     LoadConfigFromDisk();
 
     //Init modules
     m_moduleHandler->InitializeModules();
+
+    m_commands["world"] = [this](std::string arg) {
+        Load(TEWorldStream(std::move(arg)));
+    };
+    ParseArgs(argc, argv);
+
+    Execute();
 }
+
 
 void TryEngine::Execute()
 {
@@ -35,14 +49,22 @@ void TryEngine::Execute()
     }
 }
 
+void TryEngine::Load(TEWorldStream&& stream)
+{
+    m_worldStream = std::make_shared<TEWorldStream>(stream);
+}
+
 void TryEngine::ParseArgs(int argc, char** argv)
 {
     for(auto i=1; i< argc; ++i)
     {
-        std::cout << argv[i] << "\n";
+        std::string rawArg = argv[i];
+        const auto endDelimiter = rawArg.find('=');
+        std::string commandName = rawArg.substr (1,endDelimiter-1);
+        std::string argument = rawArg.substr (endDelimiter + 1, rawArg.length() - endDelimiter);
+        auto it = m_commands.find(commandName);
+        if(it != m_commands.end()) it->second(argument);
     }
-
-    std::cout << std::flush;
 }
 
 void TryEngine::LoadConfigFromDisk()
@@ -52,29 +74,23 @@ void TryEngine::LoadConfigFromDisk()
     if(config_doc.is_open())
     {
         config_doc >> root;
-        Json::Value windowSettings = root["video-settings"]["window"];
-        if(windowSettings)
-        {
-            TEWindowOptions options;
-            if(windowSettings.get("fullscreen", false).asBool())
-            {
-                options.fullScreenMode = sf::VideoMode::getFullscreenModes()[0];
-                options.style = sf::Style::Fullscreen;
-            }
-            else
-            {
-                options.size = sf::Vector2u(windowSettings.get("width", 1080).asInt(), windowSettings.get("height", 1080).asInt());
-                options.CenterPosition();
-            }
-            options.settings = sf::ContextSettings();
-            m_windowHandler = std::make_shared<TEWindow>(std::move(options));
-        }
-        Json::Value moduleSettings = root["module-settings"];
-        if(moduleSettings)
-        {
-            m_moduleHandler->LoadModules(std::move(moduleSettings));
-        }
         config_doc.close();
+        {
+            Json::Value windowSettings = root["video-settings"]["window"];
+            TEWindowOptions options;
+            if(windowSettings)
+            {
+                options.Load(windowSettings);
+            }
+            m_windowHandler = std::make_shared<TEWindow>(windowSettings ? std::move(options) : TEWindowOptions());
+        }
+        {
+            Json::Value moduleSettings = root["module-settings"];
+            if(moduleSettings)
+            {
+                m_moduleHandler->LoadModules(std::move(moduleSettings));
+            }
+        }
     }
     else
     {

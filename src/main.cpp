@@ -2,10 +2,7 @@
 
 int main(int argc, char **argv)
 {
-    TryEngine engine(argc, argv);
-
-    engine.Execute();
-
+    TE.Launch(argc, argv);
     return 0;
 }
 
