@@ -5,26 +5,35 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <functional>
 
 #include "TEEntity.hpp"
+#include "TESerializable.hpp"
+#include "json/json.h"
 
-class TEComponent
+#define TECOMPONENT_REGISTER_DESTROYER(component) TEComponent::componentsDestroyer[component::TypeID] = [](std::weak_ptr<TEEntity> owner) { TEComponents<component>::RemoveFrom(owner, false); };
+#define DESTROY_COMPONENT(componentID, entity) TEComponent::componentsDestroyer[componentID](entity);
+
+class TEComponent : public TESerializable
 {
+    static std::unordered_map<TEComponentType, std::function<std::weak_ptr<TEComponent>(std::weak_ptr<TEEntity>)>> registeredComponents;
+    static std::unordered_map<TEComponentType, std::function<void(std::weak_ptr<TEEntity>)>> componentsDestroyer;
 protected:
     TEComponent();
     TEComponent(std::weak_ptr<TEEntity> e);
-    TEComponent(TEComponent&& component) = default;
     virtual ~TEComponent() {};
 public:
     std::weak_ptr<TEEntity> Owner() const;
     virtual TEComponentType Type() const noexcept =0;
 private:
     std::weak_ptr<TEEntity> m_entity;
-    virtual void Destroy() =0;
 
     template<typename T>
     friend class TEComponents;
     friend class TEEntities;
+    friend class TEEntity;
+    friend class TEWorld;
+    friend class UserDefinedTypes;
 };
 
 template<class C>

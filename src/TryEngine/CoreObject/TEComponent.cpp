@@ -1,7 +1,9 @@
 #include "CoreObject/TEComponent.hpp"
 
-TEComponent::TEComponent() {}
+std::unordered_map<TEComponentType, std::function<std::weak_ptr<TEComponent>(std::weak_ptr<TEEntity>)>> TEComponent::registeredComponents;
+std::unordered_map<TEComponentType, std::function<void(std::weak_ptr<TEEntity>)>> TEComponent::componentsDestroyer;
 
+TEComponent::TEComponent() {}
 TEComponent::TEComponent(std::weak_ptr<TEEntity> e) : m_entity(e) {
 }
  
