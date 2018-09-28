@@ -40,7 +40,6 @@ void TEWindow::ApplyConfig()
             m_options.style,
             m_options.settings
             );
-        m_active = true;
     }
     else
     {
@@ -51,6 +50,7 @@ void TEWindow::ApplyConfig()
             m_options.settings
         );
     }
+    m_active = true;
 
     m_window->setPosition(m_options.position);
 }
@@ -60,6 +60,10 @@ void TEWindow::HandleEvents()
     sf::Event event;
     while (m_window->pollEvent(event)) {
         m_input->Handle(event);
+    }
+    if(m_input->ReceivedCloseEvent()) 
+    {
+        m_active = false;
     }
 }
 

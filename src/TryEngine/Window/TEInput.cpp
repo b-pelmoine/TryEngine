@@ -6,6 +6,6 @@ TEInput::TEInput()
 
 void TEInput::Handle(sf::Event& event)
 {
-    if(event.type == sf::Event::EventType::Closed)
+    if(event.type == sf::Event::EventType::Closed || sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
         m_queryingClose = true;
 }
