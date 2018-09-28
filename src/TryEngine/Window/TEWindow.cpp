@@ -61,7 +61,6 @@ void TEWindow::HandleEvents()
     while (m_window->pollEvent(event)) {
         m_input->Handle(event);
     }
-    if(m_input->ReceivedCloseEvent()) m_active = false;
 }
 
 void TEWindow::Draw()
