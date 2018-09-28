@@ -6,6 +6,7 @@
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include "TEInput.hpp"
+#include <json/json.h>
 
 struct TEWindowOptions
 {
@@ -29,6 +30,21 @@ struct TEWindowOptions
             sf::VideoMode::getDesktopMode().width/2 - size.x/2,
             sf::VideoMode::getDesktopMode().height/2 - size.y/2
         );
+    }
+
+    void Load(Json::Value options)
+    {
+        if(options.get("fullscreen", false).asBool())
+        {
+            fullScreenMode = sf::VideoMode::getFullscreenModes()[0];
+            style = sf::Style::Fullscreen;
+        }
+        else
+        {
+            size = sf::Vector2u(options.get("width", 1920).asInt(), options.get("height", 1080).asInt());
+            CenterPosition();
+        }
+        settings = sf::ContextSettings();
     }
 };
 
