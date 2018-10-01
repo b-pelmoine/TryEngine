@@ -4,13 +4,13 @@
 #include <SFML/Graphics.hpp>
 
 TEWindow::TEWindow(TEWindowOptions&& options) : 
-m_options(options), m_active(false), m_input(std::make_shared<TEInput>())
+m_options(options), m_input(std::make_shared<TEInput>()), m_active(false)
 {
     ApplyConfig();
 }
 
 TEWindow::TEWindow(std::shared_ptr<sf::RenderWindow> window) : 
-m_window(window), m_active(true), m_input(std::make_shared<TEInput>())
+m_window(window), m_input(std::make_shared<TEInput>()), m_active(true)
 {
     SaveCurrentConfig();
 }

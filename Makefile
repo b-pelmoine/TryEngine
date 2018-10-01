@@ -5,7 +5,7 @@ EXEC=TryEngine
 LIBPATH=../../_Libraries
 IDIR=include include/TryEngine $(LIBPATH)/SFML/include $(LIBPATH)/Box2D/include $(LIBPATH)/DiscordRPC/include $(LIBPATH)/JSONcpp/include
 IDIRFLAG=$(foreach idir, $(IDIR), -I$(idir))
-CXXFLAGS= -std=c++0x -std=c++11 -std=c++14 -std=c++17 $(IDIRFLAG)
+CXXFLAGS= -std=c++0x -std=c++11 -std=c++14 -std=c++17 $(IDIRFLAG) -Wall -Wextra -pedantic
 # Linker
 LFLAGS=$(IDIRFLAG) -L$(LIBPATH)/SFML/lib/ -L$(LIBPATH)/Box2D/lib/ -L$(LIBPATH)/DiscordRPC/lib/ -L$(LIBPATH)/JSONcpp/lib/
 LIBS= -lopengl32 -lsfml-graphics -lsfml-window -lsfml-audio -lsfml-network -lsfml-system -lbox2d -ldiscord-rpc -ljsoncpp

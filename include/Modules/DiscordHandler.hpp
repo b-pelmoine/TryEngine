@@ -23,14 +23,4 @@ class DiscordHandler : public TEModule
     static DiscordHandler* Create() { return new DiscordHandler; }
 };
 
-namespace DiscordHandlers
-{
-    static void handleDiscordReady(const DiscordUser* user);
-    static void handleDiscordError(int errorCode, const char* codeMessage);
-    static void handleDiscordDisconnected(int errorCode, const char* codeMessage);
-    static void handleDiscordJoinGame(const char* joinSecret);
-    static void handleDiscordSpectateGame(const char* spectateSecret);
-    static void handleDiscordJoinRequest(const DiscordUser* user);
-}
-
 #endif

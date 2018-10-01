@@ -29,8 +29,8 @@ public:
     void Save(const std::string& outfile = "");
     std::weak_ptr<TEWorld> GetWorld() const { return m_world; }
 private:
-    std::shared_ptr<TEWorld> m_world;
     std::string m_file;
+    std::shared_ptr<TEWorld> m_world;
 };
 
 #endif

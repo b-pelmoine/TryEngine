@@ -13,7 +13,7 @@ void TEModuleHandler::RegisterModule(const std::string& ID, TEModule* module)
 
 void TEModuleHandler::LoadModules(Json::Value&& serializedModules)
 {
-    for ( int index = 0; index < serializedModules.size(); ++index )
+    for ( Json::Value::ArrayIndex index = 0; index < serializedModules.size(); ++index )
     {
         const Json::Value module = serializedModules[index];
         if(module)

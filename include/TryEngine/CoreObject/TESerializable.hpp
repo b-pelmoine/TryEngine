@@ -6,7 +6,7 @@
 class TESerializable
 {
     public:
-    virtual void Load(Json::Value&& data) {};
+    virtual void Load(Json::Value&& data) = 0;
     virtual Json::Value Serialize() const { return Json::Value(Json::objectValue); };
     virtual void Initialize() {};
 };

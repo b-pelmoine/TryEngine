@@ -14,7 +14,7 @@ struct STest : public TESystem {
     }
     virtual void Load(Json::Value&& data)
     {
-        std::cout << "Loading... " << TypeID << "\n";
+         std::cout << "Loading... " << data.size() << ":" << TypeID << "\n";
     }
     virtual void Initialize()
     {

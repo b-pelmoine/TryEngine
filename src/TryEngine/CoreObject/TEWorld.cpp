@@ -28,12 +28,12 @@ void TEWorld::Load(TEEntities&& entities, Json::Value&& systems)
         std::vector<std::weak_ptr<TESystem>> loadedSystems;
         const size_t typeCount = systems.size();
         loadedSystems.reserve(typeCount);
-        for ( int index = 0; index < typeCount; ++index )
+        for ( Json::Value::ArrayIndex index = 0; index < typeCount; ++index )
         {
             systemType = systems[index]["TypeId"].asString();
             const size_t systemCount = systems[index]["systems"].size();
             auto it = TESystem::registeredSystems.find(systemType);
-            for ( int i = 0; i < systemCount; ++i )
+            for ( Json::Value::ArrayIndex i = 0; i < systemCount; ++i )
             {
                 system = systems[index]["systems"][i];
                 id = system["system-id"].asLargestUInt();

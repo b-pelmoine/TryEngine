@@ -6,7 +6,7 @@
 /* TEEntity */
 
 TEEntity::TEEntity(TEEntityID id) : m_id(id) 
-{};
+{}
 
 bool TEEntity::operator<(const TEEntity& other) const
 {
@@ -25,8 +25,6 @@ void TEEntity::AddComponent(std::weak_ptr<TEComponent> component)
 
 void TEEntity::RemoveComponent(std::weak_ptr<TEComponent> component)
 {
-    auto it = m_components.find(component.lock()->Type());
-    assert(it != m_components.end());
     m_components.erase(component.lock()->Type());
 }
 
@@ -40,7 +38,7 @@ Json::Value TEEntity::Serialize() const
 {
     Json::Value entity;
     entity["entity-id"] = m_id;
-    {
+    { 
         Json::Value components(Json::arrayValue);
         Json::ArrayIndex compCounter = 0;
         for(const auto& component : m_components)
@@ -57,7 +55,7 @@ Json::Value TEEntity::Serialize() const
 void TEEntity::Load(Json::Value&& data, std::weak_ptr<TEEntity> self)
 {
     if(data.size() == 0) return;
-    for ( int index = 0; index < data.size(); ++index )
+    for ( Json::Value::ArrayIndex index = 0; index < data.size(); ++index )
     {
         Json::Value component = data[index];
         TEComponentType type = component["TypeId"].asString();

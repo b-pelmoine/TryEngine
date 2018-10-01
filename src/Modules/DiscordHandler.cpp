@@ -7,6 +7,16 @@
 
 #include <iostream>
 
+namespace DiscordHandlers
+{
+    static void handleDiscordReady(const DiscordUser* user);
+    static void handleDiscordError(int errorCode, const char* codeMessage);
+    static void handleDiscordDisconnected(int errorCode, const char* codeMessage);
+    static void handleDiscordJoinGame(const char* joinSecret);
+    static void handleDiscordSpectateGame(const char* spectateSecret);
+    static void handleDiscordJoinRequest(const DiscordUser* user);
+}
+
 std::string DiscordHandler::ID() { return "DISCORD-RPC"; }
 
 DiscordHandler::DiscordHandler() {}
@@ -59,8 +69,6 @@ void DiscordHandler::UpdatePresence()
 
     std::cout << "DISCORD_UPDATE" << std::endl;
 }
-
-#pragma region DiscordHandlers
 
 static int prompt(char* line, size_t size)
 {
@@ -137,5 +145,3 @@ static void DiscordHandlers::handleDiscordJoinRequest(const DiscordUser* request
         Discord_Respond(request->userId, response);
     }
 }
-
-#pragma endregion DiscordHandlers
