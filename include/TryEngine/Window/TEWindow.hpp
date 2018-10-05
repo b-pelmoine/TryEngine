@@ -61,6 +61,7 @@ class TEWindow
     const TEWindowOptions& GetConfig() const { return m_options; }
     const std::shared_ptr<sf::RenderWindow>& GetRender() const { return m_window; }
     bool Active() const { return m_active; }
+    std::weak_ptr<TEInput> Inputs() const { return m_input; }
 
     private:
     void SaveCurrentConfig();

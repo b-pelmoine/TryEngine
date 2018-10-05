@@ -3,7 +3,6 @@
 
 #define APP_NAME "TryEngine"
 
-#include <Modules/DiscordHandler.hpp>
 #include <memory>
 #include <map>
 #include <functional>

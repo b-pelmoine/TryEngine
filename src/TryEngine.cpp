@@ -16,12 +16,10 @@ m_windowHandler(nullptr), m_moduleHandler(std::make_shared<TEModuleHandler>())
 
 void TryEngine::Launch(int argc, char** argv)
 {
-    //Register all modules
-    m_moduleHandler->RegisterModule(DiscordHandler::ID(), DiscordHandler::Create());
-
     //Register all user defined types
     m_definedTypes.RegisterAllComponents();
     m_definedTypes.RegisterAllSystems();
+    m_definedTypes.RegisterAllModules(m_moduleHandler);
 
     //Load configuration file
     LoadConfigFromDisk();
@@ -40,7 +38,7 @@ void TryEngine::Launch(int argc, char** argv)
 
 void TryEngine::Execute()
 {
-    while (m_windowHandler && m_windowHandler->Active()) 
+    while (m_windowHandler->Active()) 
     {
         m_windowHandler->HandleEvents();
         m_windowHandler->Draw();
