@@ -2,6 +2,11 @@
 #define TERO_INPUTREGISTER_HPP
 
 #include <System/TEModule.hpp>
+#include "SFML/Window/Event.hpp"
+#include "SFML/Window/Mouse.hpp"
+#include "SFML/Window/Keyboard.hpp"
+
+class TEInputDescriptor;
 
 class InputRegister : public TEModule
 {
@@ -15,6 +20,12 @@ class InputRegister : public TEModule
 
     static std::string ID();
     static InputRegister* Create() { return new InputRegister; }
+    
+    private:
+    TEInputDescriptor Deserialize(Json::Value&& data) const;
+    sf::Event::EventType    StringToEventType(const std::string& base) const;
+    sf::Keyboard::Key       StringToKey(const std::string& base) const;
+    sf::Mouse::Button       StringToButton(const std::string& base) const;
 };
 
 #endif
