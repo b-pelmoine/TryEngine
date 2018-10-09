@@ -11,7 +11,7 @@ LFLAGS=$(IDIRFLAG) -L$(LIBPATH)/SFML/lib/ -L$(LIBPATH)/Box2D/lib/ -L$(LIBPATH)/D
 LIBS= -lopengl32 -lsfml-graphics -lsfml-window -lsfml-audio -lsfml-network -lsfml-system -lbox2d -ldiscord-rpc -ljsoncpp
 # Directories
 SRCTRYENGINEMODULES= CoreObject System Window 
-SRCTRYENGINE= $(foreach sdir, $(SRCTRYENGINEMODULES), TryEngine/$(sdir))
+SRCTRYENGINE= $(foreach sdir, $(SRCTRYENGINEMODULES), TryEngine/$(sdir)) TryEngine
 SRCMODULES= $(SRCTRYENGINE) Modules Components Systems
 SRCDIR= src $(foreach sdir, $(SRCMODULES), src/$(sdir)) 
 #src src/Utilities src/TryEngine/CoreObject
