@@ -68,7 +68,7 @@ std::weak_ptr<C> TEComponents<C>::AddTo(std::weak_ptr<TEEntity>& entity) {
     }
     else
     {
-        m_components.push_back(std::make_shared<C>(C(entity)));
+        m_components.emplace_back(std::make_shared<C>(C(entity)));
         auto comp = m_components.back();
         entity.lock()->AddComponent(comp);
         return comp;
