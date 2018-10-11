@@ -11,7 +11,7 @@
 TryEngine TE;
 
 TryEngine::TryEngine():
-m_windowHandler(nullptr), m_moduleHandler(std::make_shared<TEModuleHandler>())
+m_windowHandler(nullptr), m_moduleHandler(std::make_shared<TEModuleHandler>()), m_physics(nullptr), m_worldStream(nullptr)
 {}
 
 void TryEngine::Launch(int argc, char** argv)
@@ -41,9 +41,16 @@ void TryEngine::Execute()
     while (m_windowHandler->Active()) 
     {
         m_windowHandler->HandleEvents();
-        m_windowHandler->Draw();
         //Update modules
         m_moduleHandler->UpdateModules();
+        if(m_worldStream)
+        {
+            if(const auto& world = m_worldStream->GetWorld().lock())
+            {
+                world->Update();
+            }
+        }
+        m_windowHandler->Draw();
     }
 }
 

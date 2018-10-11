@@ -36,7 +36,7 @@ class TryEngine
     std::weak_ptr<TEWindow>           Window() const            { return m_windowHandler; };
     std::weak_ptr<TEModuleHandler>    ModuleHandler() const     { return m_moduleHandler; };
     std::weak_ptr<TEPhysics>          Physics() const           { return m_physics; };
-    std::weak_ptr<TEWorld>            World() const             { return m_worldStream->GetWorld(); };
+    std::weak_ptr<TEWorldStream>      WorldStream() const       { return m_worldStream; };
     const UserDefinedTypes&           UDT() const               { return m_definedTypes; };
 
     private:
