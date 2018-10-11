@@ -3,11 +3,6 @@
 #include <iostream>
 #include <TryEngine.hpp>
 
-void TEST(const sf::Event& event)
-{
-    std::cout << "Hello" << std::endl;
-}
-
 InputRegister::InputRegister() {}
 InputRegister::~InputRegister() {}
 
@@ -96,16 +91,10 @@ TEInputDescriptor InputRegister::Deserialize(Json::Value&& data) const
 }
 
 void InputRegister::Initialize()
-{   
-    if(auto inputs = TE.Window().lock()->Inputs().lock())
-    {
-        inputs->AddListener("ShiftMouseLeftDown", TEST);
-    }
-}
+{}
 
 void InputRegister::Update()
-{
-}
+{}
 
 sf::Event::EventType InputRegister::StringToEventType(const std::string& base) const
 {
