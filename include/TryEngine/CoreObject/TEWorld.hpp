@@ -10,14 +10,17 @@ class TEWorld
 public:
     TEWorld();
 
-    TEEntities& Entities() const noexcept;
+    std::weak_ptr<TEEntities> Entities() noexcept;
 private:
-    TEEntities m_entities;
+    std::shared_ptr<TEEntities> m_entities;
+    std::vector<std::weak_ptr<TESystem>> m_systems;
     
     virtual void Load(TEEntities&& entities, Json::Value&& systems);
+    virtual void Update();
     virtual Json::Value Serialize() const;
 
     friend class TEWorldStream;
+    friend class TryEngine;
 };
 
 class TEWorldStream

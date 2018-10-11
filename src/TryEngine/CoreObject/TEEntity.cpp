@@ -101,3 +101,10 @@ void TEEntities::Load(Json::Value&& rawEntities)
         entity.lock()->Load(std::move(rawEntity["components"]), entity);
     }
 }
+
+TEEntities::TEEntities() {}
+
+TEEntities::TEEntities(TEEntities&& other)
+{
+    m_entities = other.m_entities;
+}

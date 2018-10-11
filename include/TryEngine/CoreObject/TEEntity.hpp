@@ -44,8 +44,11 @@ class TEEntity
 class TEEntities
 {
 public:
+    TEEntities();
+    TEEntities(TEEntities&& other);
     std::weak_ptr<TEEntity> Create(bool overrideID = false, Json::LargestUInt ID = 0);
     void Remove(std::weak_ptr<TEEntity> entity);
+    size_t Count() { return m_entities.size(); }
 private:
     struct Less {
         bool operator()(const std::shared_ptr<TEEntity> &lhs, 
