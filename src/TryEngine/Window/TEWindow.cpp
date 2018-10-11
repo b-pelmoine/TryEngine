@@ -6,12 +6,20 @@
 TEWindow::TEWindow(TEWindowOptions&& options) : 
 m_options(options), m_input(std::make_shared<TEInput>()), m_active(false)
 {
+    for(size_t i=0; i < static_cast<size_t>(Layer::_Count); ++i)
+    {
+        m_drawables[static_cast<Layer>(i)] = std::vector<std::weak_ptr<sf::Drawable>>();
+    }
     ApplyConfig();
 }
 
 TEWindow::TEWindow(std::shared_ptr<sf::RenderWindow> window) : 
 m_window(window), m_input(std::make_shared<TEInput>()), m_active(true)
 {
+    for(size_t i=0; i < static_cast<size_t>(Layer::_Count); ++i)
+    {
+        m_drawables[static_cast<Layer>(i)] = std::vector<std::weak_ptr<sf::Drawable>>();
+    }
     SaveCurrentConfig();
 }
 
@@ -70,6 +78,25 @@ void TEWindow::HandleEvents()
 void TEWindow::Draw()
 {
     m_window->clear(sf::Color::Black);
-    //Draw
+    for(const auto& layer: m_drawables)
+    {
+        for(const auto& drawable: layer.second)
+        {
+            m_window->draw(*(drawable.lock()));
+        }
+    }
     m_window->display();
+}
+void TEWindow::AddDrawable(std::shared_ptr<sf::Drawable> drawable, const Layer& layer)
+{
+    m_drawables[layer].push_back(drawable);
+}
+
+void TEWindow::RemoveDrawable(std::shared_ptr<sf::Drawable> drawable, const Layer& layer)
+{
+    auto& vector = m_drawables[layer];
+    vector.erase(std::remove_if(vector.begin(), vector.end(), 
+    [drawable](std::weak_ptr<sf::Drawable> other) { 
+        return drawable == other.lock(); 
+        }), vector.end());
 }

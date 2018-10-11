@@ -5,6 +5,7 @@
 #include <string>
 
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Drawable.hpp>
 #include "TEInput.hpp"
 #include <json/json.h>
 
@@ -51,6 +52,7 @@ struct TEWindowOptions
 class TEWindow
 {
     public:
+    enum class Layer { BG, MID, FG, UI, _Count };
     TEWindow(TEWindowOptions&& options);
     TEWindow(std::shared_ptr<sf::RenderWindow> window);
 
@@ -63,6 +65,9 @@ class TEWindow
     bool Active() const { return m_active; }
     std::weak_ptr<TEInput> Inputs() const { return m_input; }
 
+    void AddDrawable(std::shared_ptr<sf::Drawable> drawable, const Layer& layer = Layer::MID);
+    void RemoveDrawable(std::shared_ptr<sf::Drawable> drawable, const Layer& layer = Layer::MID);
+
     private:
     void SaveCurrentConfig();
     void ApplyConfig();
@@ -72,6 +77,8 @@ class TEWindow
     std::shared_ptr<TEInput> m_input;
     
     bool m_active;
+
+    std::map<Layer, std::vector<std::weak_ptr<sf::Drawable>>> m_drawables;
 };
 
 #endif
