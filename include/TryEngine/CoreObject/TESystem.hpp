@@ -20,6 +20,7 @@ class TESystem : public TESerializable
     virtual TESystemType Type() const =0;
     virtual TESystemID ID() const { return m_id; };
     virtual void Update() {};
+    virtual void OnDestroy() {};
 
     private:
     TESystemID m_id;
@@ -79,6 +80,8 @@ std::weak_ptr<S> TESystems<S>::Create(bool overrideID, Json::LargestUInt ID) {
 template<class S>
 void TESystems<S>::Remove(std::weak_ptr<S> system) {
     assert(!system.expired());
+    std::shared_ptr<TESystem> sys = system.lock();
+    sys->OnDestroy();
     m_systems.erase(system.lock());
 }
 
