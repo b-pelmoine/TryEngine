@@ -4,25 +4,22 @@
 #include "CoreMinimal.hpp"
 #include <iostream>
 
+class CTest;
+
 struct STest : public TESystem {
     STest(Json::LargestInt ID): TESystem(ID) {}
+    ~STest();
     static const TESystemType TypeID;
     virtual TESystemType Type() const noexcept override { return STest::TypeID; }
-    virtual Json::Value Serialize() const
-    {
-        return Json::Value(Json::objectValue);
-    }
-    virtual void Load(Json::Value&& data)
-    {
-         std::cout << "Loading... " << data.size() << ":" << TypeID << "\n";
-    }
-    virtual void Initialize()
-    {
-        std::cout << "Loaded: " << TypeID << "\n";
-    }
+    Json::Value Serialize() const override;
+    void Load(Json::Value&& data) override;
+    void Initialize() override;
+    void Update() override;
+    void OnDestroy() override;
 
     private: 
     STest(): TESystem(0) {}
+    std::vector<std::weak_ptr<CTest>> m_drawables;
     friend class UserDefinedTypes;
 };
 
