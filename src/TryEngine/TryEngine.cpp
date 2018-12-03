@@ -11,7 +11,12 @@
 TryEngine TE;
 
 TryEngine::TryEngine():
-m_windowHandler(nullptr), m_moduleHandler(std::make_shared<TEModuleHandler>()), m_physics(nullptr), m_worldStream(nullptr)
+m_windowHandler(nullptr), 
+m_moduleHandler(std::make_shared<TEModuleHandler>()), 
+m_physics(nullptr), 
+m_resources(std::make_shared<TEResourceManager>()), 
+m_worldStream(nullptr), 
+bUseCustomConfig(false)
 {}
 
 void TryEngine::Launch(int argc, char** argv)
@@ -21,16 +26,18 @@ void TryEngine::Launch(int argc, char** argv)
     m_definedTypes.RegisterAllSystems();
     m_definedTypes.RegisterAllModules(m_moduleHandler);
 
-    //Load configuration file
-    LoadConfigFromDisk();
-
     //Init modules
     m_moduleHandler->InitializeModules();
 
     m_commands["world"] = [this](std::string arg) {
         Load(TEWorldStream(std::move(arg)));
     };
+    m_commands["config"] = [this](std::string arg) {
+        LoadConfigFromFile(arg);
+    };
     ParseArgs(argc, argv);
+
+    LoadDefaultConfig();
 
     Execute();
 }
@@ -72,14 +79,15 @@ void TryEngine::ParseArgs(int argc, char** argv)
     }
 }
 
-void TryEngine::LoadConfigFromDisk()
+void TryEngine::LoadConfigFromFile(const std::string& path)
 {
     Json::Value root;
-    std::ifstream config_doc("Resources/config.json", std::ifstream::binary);
+    std::ifstream config_doc(path, std::ifstream::binary);
     if(config_doc.is_open())
     {
         config_doc >> root;
         config_doc.close();
+        bUseCustomConfig = true;
         {
             Json::Value windowSettings = root["video-settings"]["window"];
             TEWindowOptions options;
@@ -100,7 +108,14 @@ void TryEngine::LoadConfigFromDisk()
     else
     {
         std::cout << "No config file found\n";
+        LoadDefaultConfig();
+    }
+}
 
+void TryEngine::LoadDefaultConfig()
+{
+    if(!bUseCustomConfig)
+    {
         m_windowHandler = std::make_shared<TEWindow>(TEWindowOptions());
     }
 }
