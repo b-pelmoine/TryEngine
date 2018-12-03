@@ -22,7 +22,7 @@ void STest::Initialize()
     {
         if(const auto& inputs = window->Inputs().lock())
         {
-            inputs->AddListener("Save", [](const sf::Event& event){ 
+            inputs->AddListener("Save", [](const sf::Event& event __attribute__((unused))){
                 TE.WorldStream().lock()->Save("Resources/worlds/default1.world.json"); 
             });
             inputs->AddListener("Spawn", [this](const sf::Event& event){ 
@@ -36,11 +36,6 @@ void STest::Initialize()
             });
         }
     }
-}
-
-void STest::Update()
-{
-    
 }
 
 void STest::OnDestroy() 

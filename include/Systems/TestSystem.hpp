@@ -14,7 +14,6 @@ struct STest : public TESystem {
     Json::Value Serialize() const override;
     void Load(Json::Value&& data) override;
     void Initialize() override;
-    void Update() override;
     void OnDestroy() override;
 
     private: 

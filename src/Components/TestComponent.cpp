@@ -2,7 +2,6 @@
 #include "TryEngine.hpp"
 
 const TEComponentType CTest::TypeID = "CTest";
-std::pair<std::string, sf::Texture> CTest::g_texture;
 
 CTest::CTest(std::weak_ptr<TEEntity> e): TEComponent(e), position(sf::Vector2i(0,0)), angle(0.0f)
 {}
@@ -17,7 +16,7 @@ Json::Value CTest::Serialize() const
     obj["x"] = position.x;
     obj["y"] = position.y;
     obj["rot"] = angle;
-    obj["tex"] = g_texture.first;
+    obj["tex"] = "???";
     return obj;
 }
 
@@ -25,16 +24,19 @@ void CTest::Load(Json::Value&& data)
 {
     position = sf::Vector2f(data.get("x", 0).asFloat(), data.get("y", 0).asFloat());
     angle = data.get("rot", 0.0f).asFloat();
-    if(!g_texture.second.loadFromFile(data.get("tex", "").asString()))
+    if( auto res = TE.Resources().lock())
     {
-        std::cout << "cannot find " << data.get("tex", "").asString() << std::endl;
+        auto tex = dynamic_cast<TETexture*>( res->Register("sprite_test", data.get("tex", "").asString(), TEResource::Type::TEXTURE) );
+        std::cout << tex->GetLocation() << std::endl;
     }
-    g_texture.first = data.get("tex", "").asString();
 }
 
 void CTest::Initialize()
 {
-    sprite.setTexture(g_texture.second);
+    if( auto res = TE.Resources().lock())
+    {
+        sprite.setTexture(res->GetTexture("sprite_test").Get());
+    }
     sprite.setOrigin(sprite.getGlobalBounds().width/2, sprite.getGlobalBounds().height/2);
     sprite.setPosition(position);
     sprite.setRotation(angle);

@@ -23,7 +23,6 @@ struct CTest : public TEComponent, public sf::Drawable {
     sf::Vector2f position;
     float angle;
     virtual void Tranform(const sf::Transform& transform);
-    static std::pair<std::string, sf::Texture> g_texture;
 };
 
 #endif
