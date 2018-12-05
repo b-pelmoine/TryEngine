@@ -108,3 +108,10 @@ TEEntities::TEEntities(TEEntities&& other)
 {
     m_entities = other.m_entities;
 }
+
+std::weak_ptr<TEEntity> TEEntities::Get(TEEntityID id)
+{
+    auto isID = [id](std::shared_ptr<TEEntity> e) { return e->ID() == id; };
+    auto it = std::find_if (m_entities.begin(), m_entities.end(), isID);
+    return (it != m_entities.end()) ? *it : nullptr;
+}

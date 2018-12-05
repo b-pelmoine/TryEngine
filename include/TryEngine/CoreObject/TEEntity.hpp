@@ -48,6 +48,7 @@ public:
     TEEntities(TEEntities&& other);
     std::weak_ptr<TEEntity> Create(bool overrideID = false, Json::LargestUInt ID = 0);
     void Remove(std::weak_ptr<TEEntity> entity);
+    std::weak_ptr<TEEntity> Get(TEEntityID id);
     size_t Count() { return m_entities.size(); }
 private:
     struct Less {
