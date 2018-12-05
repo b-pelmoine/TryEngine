@@ -2,6 +2,7 @@
 #define TERO_SYSTEM_HPP
 
 #include "TESerializable.hpp"
+#include "TEEntity.hpp"
 #include <unordered_map>
 #include <vector>
 #include <algorithm>
@@ -11,16 +12,24 @@
 using TESystemType = std::string;
 using TESystemID = Json::LargestUInt;
 
-class TESystem : public TESerializable
+class TESerializableSystem : public TESerializable
+{
+    public:
+    virtual void Load(Json::Value&& data __attribute__((unused))) {};
+    virtual void Load(Json::Value&& data, std::shared_ptr<TEEntities> entities) = 0;
+};
+
+class TESystem : public TESerializableSystem
 {
     static std::unordered_map<TESystemType, std::function<std::weak_ptr<TESystem>(TESystemID)>> registeredSystems;
+    static std::unordered_map<TESystemType, std::function<void(std::weak_ptr<TESystem>)>> systemsDestroyer;
     public:
     TESystem(Json::LargestUInt ID): m_id(ID) {};
     virtual ~TESystem() {};
     virtual TESystemType Type() const =0;
     virtual TESystemID ID() const { return m_id; };
     virtual void Update() {};
-    virtual void OnDestroy() {};
+    virtual void OnDestroy(std::weak_ptr<TESystem> self) =0;
 
     private:
     TESystemID m_id;
@@ -80,9 +89,7 @@ std::weak_ptr<S> TESystems<S>::Create(bool overrideID, Json::LargestUInt ID) {
 template<class S>
 void TESystems<S>::Remove(std::weak_ptr<S> system) {
     assert(!system.expired());
-    std::shared_ptr<TESystem> sys = system.lock();
-    sys->OnDestroy();
-    m_systems.erase(system.lock());
+    m_systems.erase(std::remove(m_systems.begin(), m_systems.end(), system.lock()));
 }
 
 #endif
