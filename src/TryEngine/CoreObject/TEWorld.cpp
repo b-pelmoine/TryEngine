@@ -5,7 +5,10 @@
 
 #include "TryEngine.hpp"
 
-TEWorld::TEWorld()
+TEWorld::TEWorld(): 
+bLoaded(false), 
+m_entities(nullptr), 
+m_systems(std::vector<std::weak_ptr<TESystem>>())
 {}
 
 std::weak_ptr<TEEntities> TEWorld::Entities() noexcept
@@ -43,12 +46,14 @@ void TEWorld::Load(TEEntities&& entities, Json::Value&& systems)
                 system = systems[index]["systems"][i];
                 id = system["system-id"].asLargestUInt();
                 m_systems.push_back(it->second(id));
-                std::prev(m_systems.end())->lock()->Load(std::move(system["data"]));
+                std::prev(m_systems.end())->lock()->Load(std::move(system["data"]), m_entities);
             }
         }
         auto init = [](auto& s){ s.lock()->Initialize(); };
         std::for_each(m_systems.begin(), m_systems.end(), init);
     }
+    //mark as loaded
+    bLoaded = true;
 }
 
 void TEWorld::Update()
@@ -82,6 +87,22 @@ Json::Value TEWorld::Serialize() const
     return world;
 }
 
+void TEWorld::UnLoad()
+{
+    if(!bLoaded) return;
+    for(auto& w_sys: m_systems)
+    {
+        if(const auto& sys = w_sys.lock())
+        {
+            sys->OnDestroy(w_sys);
+        }
+    }
+    while(!m_entities->m_entities.empty())
+    {
+        m_entities->Remove(*m_entities->m_entities.begin());
+    }
+}
+
 /* TEWorldStream */
 
 TEWorldStream::TEWorldStream(std::string&& file): m_file(file), m_world(std::make_shared<TEWorld>())
@@ -92,17 +113,22 @@ TEWorldStream::TEWorldStream(std::string&& file): m_file(file), m_world(std::mak
 void TEWorldStream::Load(const std::string& file)
 {
     std::string inFile = !file.empty() ? file : m_file;
+    m_file = inFile;
     Json::Value root;
     std::ifstream stream(inFile, std::ifstream::binary);
     if(stream.is_open())
     {
         stream >> root;
         stream.close();
+
+        m_world->UnLoad();
+
         TEEntities entities;
         entities.Load(std::move(root["entities"]));
         m_world->Load(std::move(entities), std::move(root["systems"]));
     }
 }
+
 
 void TEWorldStream::Save(const std::string& file)
 {

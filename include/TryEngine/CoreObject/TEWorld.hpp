@@ -12,12 +12,15 @@ public:
 
     std::weak_ptr<TEEntities> Entities() noexcept;
 private:
+    bool bLoaded;
     std::shared_ptr<TEEntities> m_entities;
     std::vector<std::weak_ptr<TESystem>> m_systems;
     
     virtual void Load(TEEntities&& entities, Json::Value&& systems);
+    void UnLoad();
     virtual void Update();
     virtual Json::Value Serialize() const;
+    bool Loaded() const { return bLoaded; }
 
     friend class TEWorldStream;
     friend class TryEngine;
@@ -31,6 +34,7 @@ public:
     void Load(const std::string& infile = "");
     void Save(const std::string& outfile = "");
     std::weak_ptr<TEWorld> GetWorld() const { return m_world; }
+    std::string Filename() const { return m_file; }
 private:
     std::string m_file;
     std::shared_ptr<TEWorld> m_world;
