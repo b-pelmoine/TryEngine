@@ -12,13 +12,14 @@ struct STest : public TESystem {
     static const TESystemType TypeID;
     virtual TESystemType Type() const noexcept override { return STest::TypeID; }
     Json::Value Serialize() const override;
-    void Load(Json::Value&& data) override;
+    void Load(Json::Value&& data, std::shared_ptr<TEEntities> entities) override;
     void Initialize() override;
-    void OnDestroy() override;
+    void OnDestroy(std::weak_ptr<TESystem> self) override;
 
     private: 
     STest(): TESystem(0) {}
     std::vector<std::weak_ptr<CTest>> m_drawables;
+    size_t saveID, spawnID, switchID;
     friend class UserDefinedTypes;
 };
 

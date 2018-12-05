@@ -3,7 +3,7 @@
 
 const TEComponentType CTest::TypeID = "CTest";
 
-CTest::CTest(std::weak_ptr<TEEntity> e): TEComponent(e), position(sf::Vector2i(0,0)), angle(0.0f)
+CTest::CTest(std::weak_ptr<TEEntity> e): TEComponent(e), texFile(""), position(sf::Vector2i(0,0)), angle(0.0f)
 {}
 
 CTest::~CTest()
@@ -16,7 +16,7 @@ Json::Value CTest::Serialize() const
     obj["x"] = position.x;
     obj["y"] = position.y;
     obj["rot"] = angle;
-    obj["tex"] = "???";
+    obj["tex"] = texFile;
     return obj;
 }
 
@@ -24,10 +24,10 @@ void CTest::Load(Json::Value&& data)
 {
     position = sf::Vector2f(data.get("x", 0).asFloat(), data.get("y", 0).asFloat());
     angle = data.get("rot", 0.0f).asFloat();
-    if( auto res = TE.Resources().lock())
+    if(auto res = TE.Resources().lock())
     {
-        auto tex = dynamic_cast<TETexture*>( res->Register("sprite_test", data.get("tex", "").asString(), TEResource::Type::TEXTURE) );
-        std::cout << tex->GetLocation() << std::endl;
+        texFile = data.get("tex", "").asString();
+        dynamic_cast<TETexture*>( res->Register(texFile, texFile, TEResource::Type::TEXTURE) );
     }
 }
 
@@ -35,7 +35,16 @@ void CTest::Initialize()
 {
     if( auto res = TE.Resources().lock())
     {
-        sprite.setTexture(res->GetTexture("sprite_test").Get());
+        if(texFile.empty()) 
+        {
+            if(auto res = TE.Resources().lock())
+            {
+                texFile = "Resources/gift.png";
+                dynamic_cast<TETexture*>( res->Register(texFile, texFile, TEResource::Type::TEXTURE) );
+            }
+        }
+        auto& tex = res->GetTexture(texFile);
+        sprite.setTexture(tex.Get());
     }
     sprite.setOrigin(sprite.getGlobalBounds().width/2, sprite.getGlobalBounds().height/2);
     sprite.setPosition(position);

@@ -7,7 +7,7 @@
 #include <iostream>
 
 struct CTest : public TEComponent, public sf::Drawable {
-    CTest() { std::cout << "used" << std::endl;}
+    CTest() { std::cout << "used" << std::endl; }
     CTest(std::weak_ptr<TEEntity> e);
     virtual ~CTest();
     static const TEComponentType TypeID;
@@ -18,6 +18,7 @@ struct CTest : public TEComponent, public sf::Drawable {
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
     sf::Sprite sprite;
+    std::string texFile;
     
     public:
     sf::Vector2f position;
