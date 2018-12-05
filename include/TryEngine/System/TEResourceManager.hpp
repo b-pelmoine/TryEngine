@@ -32,7 +32,7 @@ class TEResource
     std::string GetLocation() const { return m_diskLocation; }
 
     virtual void Load() =0;
-    State State() const { return m_state; }
+    State GetState() const { return m_state; }
     bool Loaded() const { return m_state == State::LOADED; }
     
 };
