@@ -62,7 +62,10 @@ void TEWorld::Update()
     {
         if(const auto& sys = w_sys.lock())
         {
-            sys->Update();
+            if(sys->CanTick())
+            {
+                sys->Tick();
+            }
         }
     }
     auto element = std :: remove_if (m_systems.begin(), m_systems.end() , [](const std::weak_ptr<TESystem>& w_sys){ return w_sys.expired(); });

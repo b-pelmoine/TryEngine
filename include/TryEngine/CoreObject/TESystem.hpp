@@ -19,17 +19,23 @@ class TESerializableSystem : public TESerializable
     virtual void Load(Json::Value&& data, std::shared_ptr<TEEntities> entities) = 0;
 };
 
+#define DESTROY_SYS(system, w_pointer) if(auto sys = std::dynamic_pointer_cast<system> (w_pointer.lock()) ){TESystems<system>::Remove(std::weak_ptr<system>(sys));}
+
 class TESystem : public TESerializableSystem
 {
     static std::unordered_map<TESystemType, std::function<std::weak_ptr<TESystem>(TESystemID)>> registeredSystems;
     static std::unordered_map<TESystemType, std::function<void(std::weak_ptr<TESystem>)>> systemsDestroyer;
     public:
-    TESystem(Json::LargestUInt ID): m_id(ID) {};
+    TESystem(Json::LargestUInt ID): bCanEverTick(false), m_id(ID) {};
     virtual ~TESystem() {};
     virtual TESystemType Type() const =0;
     virtual TESystemID ID() const { return m_id; };
-    virtual void Update() {};
+    virtual bool CanTick() const { return bCanEverTick; }
+    virtual void Tick() {};
     virtual void OnDestroy(std::weak_ptr<TESystem> self) =0;
+
+    protected:
+    bool bCanEverTick;
 
     private:
     TESystemID m_id;
