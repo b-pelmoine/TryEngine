@@ -81,8 +81,5 @@ void STest::OnDestroy(std::weak_ptr<TESystem> self)
             window->RemoveDrawable(drawable.lock(), TEWindow::Layer::UI);
         }
     }
-    if(auto sys = std::dynamic_pointer_cast<STest> (self.lock()) )
-    {
-        TESystems<STest>::Remove(std::weak_ptr<STest>(sys));
-    }
+    DESTROY_SYS(STest, self)
 }
