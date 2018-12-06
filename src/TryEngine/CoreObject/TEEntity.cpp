@@ -28,12 +28,6 @@ void TEEntity::RemoveComponent(std::weak_ptr<TEComponent> component)
     m_components.erase(component.lock()->Type());
 }
 
-std::optional<std::weak_ptr<TEComponent>> TEEntity::GetComponent(TEComponentType type) const
-{
-    auto it = m_components.find(type);
-    return (it != m_components.end()) ? std::optional<std::weak_ptr<TEComponent>>{it->second} : std::nullopt;
-}
-
 Json::Value TEEntity::Serialize() const
 {
     Json::Value entity;

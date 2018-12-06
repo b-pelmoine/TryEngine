@@ -21,7 +21,8 @@ class TEEntity
     bool operator<(const TEEntity& other) const;
     bool operator==(const TEEntity& other) const;
 
-    std::optional<std::weak_ptr<TEComponent>> GetComponent(TEComponentType type) const;
+    template<class C>
+    std::shared_ptr<C> GetComponent() const;
 
     private: 
     TEEntity(TEEntityID id);
@@ -40,6 +41,13 @@ class TEEntity
     friend class TEComponents;
     friend class TEWorld;
 };
+
+template<class C>
+std::shared_ptr<C> TEEntity::GetComponent() const
+{
+    auto it = m_components.find(C::TypeID);
+    return (it != m_components.end()) ? std::dynamic_pointer_cast<C> (std::weak_ptr<TEComponent>{it->second}.lock()) : nullptr;
+}
 
 class TEEntities
 {
@@ -64,5 +72,6 @@ private:
     friend class TEWorldStream;
     friend class TEWorld;
 };
+
 
 #endif

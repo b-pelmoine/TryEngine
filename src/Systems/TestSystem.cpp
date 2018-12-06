@@ -24,13 +24,10 @@ void STest::Load(Json::Value&& data, std::shared_ptr<TEEntities> entities)
     for(auto& id: data)
     {
         auto entity = entities->Get(id.asUInt64());
-        if(auto component = entity.lock()->GetComponent(CTest::TypeID))
+        if(auto pos = entity.lock()->GetComponent<CTest>())
         {
-            if(auto pos = std::dynamic_pointer_cast<CTest> (component->lock()) )
-            {
-                TE.Window().lock()->AddDrawable(pos, TEWindow::Layer::UI);
-                m_drawables.push_back(pos);
-            }
+            TE.Window().lock()->AddDrawable(pos, TEWindow::Layer::UI);
+            m_drawables.push_back(pos);
         }
     }
 }
