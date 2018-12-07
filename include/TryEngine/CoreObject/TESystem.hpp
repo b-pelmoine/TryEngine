@@ -12,6 +12,11 @@
 using TESystemType = std::string;
 using TESystemID = Json::LargestUInt;
 
+#define TESYSTEM_REGISTER_DESTROYER(system) TESystem::systemsDestroyer[system::TypeID] = [](std::weak_ptr<TESystem> w_pointer) { \
+    if(auto sys = std::dynamic_pointer_cast<system> (w_pointer.lock()) ){TESystems<system>::Remove(std::weak_ptr<system>(sys));} \
+}
+#define DESTROY_SYS(w_pointer) w_pointer.lock()->OnDestroy(); TESystem::systemsDestroyer[w_pointer.lock()->Type()](w_pointer);
+
 class TESerializableSystem : public TESerializable
 {
     public:
@@ -19,12 +24,8 @@ class TESerializableSystem : public TESerializable
     virtual void Load(Json::Value&& data, std::shared_ptr<TEEntities> entities) = 0;
 };
 
-#define DESTROY_SYS(system, w_pointer) if(auto sys = std::dynamic_pointer_cast<system> (w_pointer.lock()) ){TESystems<system>::Remove(std::weak_ptr<system>(sys));}
-
 class TESystem : public TESerializableSystem
 {
-    static std::unordered_map<TESystemType, std::function<std::weak_ptr<TESystem>(TESystemID)>> registeredSystems;
-    static std::unordered_map<TESystemType, std::function<void(std::weak_ptr<TESystem>)>> systemsDestroyer;
     public:
     TESystem(Json::LargestUInt ID): bCanEverTick(false), m_id(ID) {};
     virtual ~TESystem() {};
@@ -32,8 +33,10 @@ class TESystem : public TESerializableSystem
     virtual TESystemID ID() const { return m_id; };
     virtual bool CanTick() const { return bCanEverTick; }
     virtual void Tick() {};
-    virtual void OnDestroy(std::weak_ptr<TESystem> self) =0;
+    virtual void OnDestroy() =0;
 
+    static std::unordered_map<TESystemType, std::function<std::weak_ptr<TESystem>(TESystemID)>> registeredSystems;
+    static std::unordered_map<TESystemType, std::function<void(std::weak_ptr<TESystem>)>> systemsDestroyer;
     protected:
     bool bCanEverTick;
 
@@ -45,6 +48,7 @@ class TESystem : public TESerializableSystem
     friend class TESystems;
     friend class TEWorld;
 };
+
 
 template<class S>
 class TESystems 
@@ -91,7 +95,7 @@ std::weak_ptr<S> TESystems<S>::Create(bool overrideID, Json::LargestUInt ID) {
     }
     return *(Iterator);
 }
-
+#include <iostream>
 template<class S>
 void TESystems<S>::Remove(std::weak_ptr<S> system) {
     assert(!system.expired());

@@ -95,10 +95,7 @@ void TEWorld::UnLoad()
     if(!bLoaded) return;
     for(auto& w_sys: m_systems)
     {
-        if(const auto& sys = w_sys.lock())
-        {
-            sys->OnDestroy(w_sys);
-        }
+        DESTROY_SYS(w_sys)
     }
     while(!m_entities->m_entities.empty())
     {

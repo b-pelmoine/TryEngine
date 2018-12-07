@@ -60,7 +60,7 @@ void STest::Initialize()
     }
 }
 
-void STest::OnDestroy(std::weak_ptr<TESystem> self) 
+void STest::OnDestroy() 
 {
     if(const auto& window = TE.Window().lock())
     {
@@ -78,5 +78,4 @@ void STest::OnDestroy(std::weak_ptr<TESystem> self)
             window->RemoveDrawable(drawable.lock(), TEWindow::Layer::UI);
         }
     }
-    DESTROY_SYS(STest, self)
 }

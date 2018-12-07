@@ -14,7 +14,7 @@ struct STest : public TESystem {
     Json::Value Serialize() const override;
     void Load(Json::Value&& data, std::shared_ptr<TEEntities> entities) override;
     void Initialize() override;
-    void OnDestroy(std::weak_ptr<TESystem> self) override;
+    void OnDestroy() override;
 
     private: 
     STest(): TESystem(0) {}
