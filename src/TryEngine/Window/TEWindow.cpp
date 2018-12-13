@@ -75,6 +75,11 @@ void TEWindow::HandleEvents()
     }
 }
 
+void TEWindow::PostUpdate()
+{
+    m_input->PostUpdate();
+}
+
 void TEWindow::Draw()
 {
     m_window->clear(sf::Color::Black);

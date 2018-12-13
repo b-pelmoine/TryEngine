@@ -95,7 +95,7 @@ std::weak_ptr<S> TESystems<S>::Create(bool overrideID, Json::LargestUInt ID) {
     }
     return *(Iterator);
 }
-#include <iostream>
+
 template<class S>
 void TESystems<S>::Remove(std::weak_ptr<S> system) {
     assert(!system.expired());

@@ -2,7 +2,6 @@
 #define TERO_SYS_TEST_HPP
 
 #include "CoreMinimal.hpp"
-#include <iostream>
 
 class CTest;
 

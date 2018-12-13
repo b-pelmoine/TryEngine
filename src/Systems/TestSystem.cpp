@@ -1,5 +1,6 @@
 #include "Systems/TestSystem.hpp"
 #include "TryEngine.hpp"
+#include <iostream>
 
 const TEComponentType STest::TypeID = "STest";
 
