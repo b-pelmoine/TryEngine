@@ -20,15 +20,36 @@ void InputRegister::Load(Json::Value&& data)
             const size_t inputCount = root.size();
             for ( Json::Value::ArrayIndex index = 0; index < inputCount; ++index )
             {
-                inputs->RegisterInputDescriptor(
-                    Deserialize(std::move(root[index]))
-                );
+                if(!root[index].get("live", false).asBool())
+                {
+                    std::cout << "Register normal input" << std::endl;
+                    inputs->RegisterInputDescriptor(
+                        DeserializeInput(std::move(root[index]))
+                    );
+                }
+                else
+                {
+                    if(root[index].get("axis", Json::nullValue) == Json::nullValue)
+                    {
+                        std::cout << "Register live input" << std::endl;
+                        inputs->RegisterLiveInput(
+                            DeserializeLiveInput(std::move(root[index]))
+                        );
+                    }
+                    else
+                    {
+                        std::cout << "Register axis" << std::endl;
+                        inputs->RegisterAxis(
+                            DeserializeAxis(std::move(root[index]))
+                        );
+                    }
+                }
             }
         }
     }
 }
 
-TEInputDescriptor InputRegister::Deserialize(Json::Value&& data) const
+TEInputDescriptor InputRegister::DeserializeInput(Json::Value&& data) const
 {
     std::vector<std::function<bool()>> modifiers;
 
@@ -72,7 +93,8 @@ TEInputDescriptor InputRegister::Deserialize(Json::Value&& data) const
             case T_::JoystickButtonReleased:
             {
                 unsigned int buttonID = key.asUInt();
-                test = [buttonID](const sf::Event& event){ return event.joystickButton.button == buttonID;};
+                unsigned int joystickID = data["joystickID"].asUInt();
+                test = [buttonID, joystickID](const sf::Event& event){ return (event.joystickButton.button == buttonID) && (event.joystickButton.joystickId == joystickID);};
             }break;
             default: break;
         }
@@ -90,11 +112,146 @@ TEInputDescriptor InputRegister::Deserialize(Json::Value&& data) const
     return TEInputDescriptor(data["ID"].asString(), type, predicate);
 }
 
+TELiveInputDescriptor InputRegister::DeserializeLiveInput(Json::Value&& data) const
+{
+    std::vector<std::function<bool()>> modifiers;
+
+    if(!data.get("modifiers", Json::nullValue).isNull())
+    {
+        const auto isShift = [](){ return sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift);  };
+        const auto isCtrl = [](){ return sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl); };
+        const auto isAlt = [](){ return sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) || sf::Keyboard::isKeyPressed(sf::Keyboard::RAlt); };
+
+        bool shift = data["modifiers"]["shift"].asBool();
+        bool ctrl = data["modifiers"]["ctrl"].asBool();
+        bool alt = data["modifiers"]["alt"].asBool();
+
+        if(shift) modifiers.push_back(isShift);
+        if(ctrl) modifiers.push_back(isCtrl);
+        if(alt) modifiers.push_back(isAlt);
+    }
+    
+    LiveInputType type = StringToLiveInputType(data["input-type"].asString());
+    std::function<bool(void)> test;
+    Json::Value key = data["key-tested"];
+    if(key != Json::nullValue)
+    {
+        using T_ = LiveInputType;
+
+        switch(type)
+        {
+            case T_::Mouse: 
+            {
+                sf::Mouse::Button mouseButton = StringToButton(key.asString());
+                test = [mouseButton](){ return sf::Mouse::isButtonPressed(mouseButton); };
+            }break;
+            case T_::Keyboard:
+            {
+                sf::Keyboard::Key keyID = StringToKey(key.asString());
+                test = [keyID](){ return sf::Keyboard::isKeyPressed(keyID); };
+            }break;
+            case T_::Joystick:
+            {
+                unsigned int buttonID = key.asUInt();
+                unsigned int joystickID = data["joystickID"].asUInt();
+                test = [joystickID, buttonID](){ return sf::Joystick::isButtonPressed(joystickID, buttonID); };
+            }break;
+            default: break;
+        }
+    }
+
+    auto predicate = [test, modifiers](){ 
+        for(const auto& modifier : modifiers){
+                if(!modifier()) return false;
+            }
+        if(test) return test();
+        else 
+            return true;
+    };
+    
+    return TELiveInputDescriptor(data["ID"].asString(), predicate);
+}
+
+TEAxisDescriptor InputRegister::DeserializeAxis(Json::Value&& data) const
+{
+    std::vector<std::function<float(void)>> axisEvaluators;
+
+    LiveInputType type; 
+    Json::Value key; 
+    Json::Value factor;
+    
+    using T_ = LiveInputType;
+    const size_t factorsCount = data["axis"].size();
+    for ( Json::Value::ArrayIndex index = 0; index < factorsCount; ++index )
+    {
+        factor = data["axis"][index];
+        std::function<float(void)> axisEvaluator;
+        type = StringToLiveInputType(factor["input-type"].asString());
+        auto condition = factor.get("cond", "").asString();
+        std::function<bool(void)> cond = nullptr;
+        if(!condition.empty())
+        {
+            auto inputs = TE.Window().lock()->Inputs();
+            cond = [inputs, condition]() { return inputs.lock()->IsInputTriggered(condition); };
+        }
+        std::function<float(void)> t_evaluator = nullptr;
+        switch(type)
+        {
+            case T_::Mouse: {
+                auto inputs = TE.Window().lock()->Inputs();
+                bool isXAxis = (factor.get("axis", "X") == "X");
+                float scale = factor.get("scale", 1.0f).asFloat();
+                t_evaluator = [inputs, isXAxis, scale](){ return scale * (isXAxis ? inputs.lock()->GetNormMouseDelta().x : inputs.lock()->GetNormMouseDelta().y); };
+            } break;
+            case T_::Keyboard:
+            {
+                key = factor["key-tested"];
+                if(key != Json::nullValue)
+                {
+                    sf::Keyboard::Key keyID = StringToKey(key.asString());
+                    float scale = factor.get("scale", 1.0f).asFloat();
+                    t_evaluator = [keyID, scale](){ return (sf::Keyboard::isKeyPressed(keyID)) ? scale : 0.0f; };
+                }
+            }break;
+            case T_::Joystick:
+            {
+                sf::Joystick::Axis axisID = static_cast<sf::Joystick::Axis>(key.asUInt());
+                unsigned int joystickID = factor["joystickID"].asUInt();
+                t_evaluator = [joystickID, axisID](){ return sf::Joystick::getAxisPosition(joystickID, axisID); };
+            }break;
+            default: break;
+        }
+        if(t_evaluator == nullptr) continue;
+        axisEvaluator = (cond != nullptr) ? 
+            [t_evaluator, cond](){ return (cond()) ? t_evaluator() : 0.0f;} : 
+            std::function<float(void)>(t_evaluator);
+        axisEvaluators.push_back(axisEvaluator);
+    }
+
+    auto getAxis = [axisEvaluators](){
+        float axisBias = 0.0f;
+        for(const auto& evaluator: axisEvaluators) axisBias += evaluator();
+        return axisBias;
+    };
+
+    return TEAxisDescriptor(data["ID"].asString(), getAxis);
+}
+
 void InputRegister::Initialize()
 {}
 
 void InputRegister::Update()
 {}
+
+LiveInputType InputRegister::StringToLiveInputType(const std::string& base) const
+{
+    const std::map<std::string,LiveInputType> LiveInputTypes {
+        { "Mouse", LiveInputType::Mouse },
+        { "Keyboard", LiveInputType::Keyboard }
+    };
+    auto it = LiveInputTypes.find(base);
+    return it == LiveInputTypes.end() ? LiveInputType::Mouse : it->second;
+}
 
 sf::Event::EventType InputRegister::StringToEventType(const std::string& base) const
 {
