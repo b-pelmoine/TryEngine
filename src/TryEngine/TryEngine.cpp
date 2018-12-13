@@ -26,9 +26,6 @@ void TryEngine::Launch(int argc, char** argv)
     m_definedTypes.RegisterAllSystems();
     m_definedTypes.RegisterAllModules(m_moduleHandler);
 
-    //Init modules
-    m_moduleHandler->InitializeModules();
-
     m_commands["world"] = [this](std::string arg) {
         Load(TEWorldStream(std::move(arg)));
     };
@@ -36,6 +33,9 @@ void TryEngine::Launch(int argc, char** argv)
         LoadConfigFromFile(arg);
     };
     ParseArgs(argc, argv);
+
+    //Init modules
+    m_moduleHandler->InitializeModules();
 
     LoadDefaultConfig();
 
@@ -57,6 +57,7 @@ void TryEngine::Execute()
                 world->Update();
             }
         }
+        m_windowHandler->PostUpdate();
         m_windowHandler->Draw();
     }
 }
