@@ -8,6 +8,7 @@
 
 /*include all classes defining systems here*/
 #include "Systems/TestSystem.hpp"
+#include "Systems/CameraController.hpp"
 
 /*include all classes defining modules here*/
 #include "Modules/DiscordHandler.hpp"
@@ -30,6 +31,7 @@ struct UserDefinedTypes
     void RegisterAllSystems() const
     {
         REGISTER_SYSTEM(STest);
+        REGISTER_SYSTEM(SCameraController);
     }
 
     void RegisterAllModules(std::shared_ptr<TEModuleHandler> handler) const
