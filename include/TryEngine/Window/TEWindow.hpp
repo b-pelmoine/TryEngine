@@ -57,6 +57,7 @@ class TEWindow
     TEWindow(std::shared_ptr<sf::RenderWindow> window);
 
     void HandleEvents();
+    void PostUpdate();
     void Draw();
 
     void Config(const TEWindowOptions& options);
