@@ -47,8 +47,8 @@ void TryEngine::Execute()
 {
     while (m_windowHandler->Active()) 
     {
+        tickTime.Tick();
         m_windowHandler->HandleEvents();
-        //Update modules
         m_moduleHandler->UpdateModules();
         if(m_worldStream)
         {

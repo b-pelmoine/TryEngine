@@ -14,6 +14,7 @@
 #include "System/TEPhysics.hpp"
 #include "System/TEResourceManager.hpp"
 #include "CoreObject/TEWorld.hpp"
+#include "CoreObject/TETime.hpp"
 
 #include "UserDefinedTypes.hpp"
 
@@ -42,6 +43,9 @@ class TryEngine
     std::weak_ptr<TEResourceManager>  Resources() const         { return m_resources; };
     std::weak_ptr<TEWorldStream>      WorldStream() const       { return m_worldStream; };
     const UserDefinedTypes&           UDT() const               { return m_definedTypes; };
+
+    TETime globalTime;
+    TETime tickTime;
 
     private:
     void Execute();
