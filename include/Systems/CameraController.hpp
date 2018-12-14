@@ -20,10 +20,10 @@ public:
 
 private: 
     SCameraController(): TESystem(0) {}
-    size_t topID, leftID, rightID, downID;
     sf::View m_view;
     std::shared_ptr<sf::RenderWindow> m_window;
     std::shared_ptr<TEInput> m_inputs;
+    float m_BaseSpeed, m_FastSpeed;
     friend class UserDefinedTypes;
 };
 

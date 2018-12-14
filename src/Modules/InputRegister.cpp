@@ -22,7 +22,6 @@ void InputRegister::Load(Json::Value&& data)
             {
                 if(!root[index].get("live", false).asBool())
                 {
-                    std::cout << "Register normal input" << std::endl;
                     inputs->RegisterInputDescriptor(
                         DeserializeInput(std::move(root[index]))
                     );
@@ -31,14 +30,12 @@ void InputRegister::Load(Json::Value&& data)
                 {
                     if(root[index].get("axis", Json::nullValue) == Json::nullValue)
                     {
-                        std::cout << "Register live input" << std::endl;
                         inputs->RegisterLiveInput(
                             DeserializeLiveInput(std::move(root[index]))
                         );
                     }
                     else
                     {
-                        std::cout << "Register axis" << std::endl;
                         inputs->RegisterAxis(
                             DeserializeAxis(std::move(root[index]))
                         );
