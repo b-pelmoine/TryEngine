@@ -16,7 +16,6 @@ class InputRegister : public TEModule
     public:
     void Load(Json::Value&& data) override;
     void Initialize() override;
-    void Update() override;
 
     InputRegister();
     ~InputRegister();

@@ -237,14 +237,12 @@ TEAxisDescriptor InputRegister::DeserializeAxis(Json::Value&& data) const
 void InputRegister::Initialize()
 {}
 
-void InputRegister::Update()
-{}
-
 LiveInputType InputRegister::StringToLiveInputType(const std::string& base) const
 {
     const std::map<std::string,LiveInputType> LiveInputTypes {
         { "Mouse", LiveInputType::Mouse },
-        { "Keyboard", LiveInputType::Keyboard }
+        { "Keyboard", LiveInputType::Keyboard },
+        { "Joystick", LiveInputType::Joystick }
     };
     auto it = LiveInputTypes.find(base);
     return it == LiveInputTypes.end() ? LiveInputType::Mouse : it->second;
