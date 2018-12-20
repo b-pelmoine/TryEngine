@@ -21,7 +21,7 @@ Json::Value SCameraController::Serialize() const
     return sys;
 }
 
-void SCameraController::Load(Json::Value&& data, std::shared_ptr<TEEntities> entities)
+void SCameraController::Load(Json::Value&& data, std::shared_ptr<TEEntities> entities __attribute__((unused)))
 {
     m_BaseSpeed = data["base-speed"].asFloat();
     m_FastSpeed = data["fast-speed"].asFloat();
