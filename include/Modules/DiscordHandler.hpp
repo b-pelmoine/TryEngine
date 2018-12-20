@@ -8,7 +8,7 @@
 
 class DiscordHandler : public TEModule
 {
-    char* APP_ID;
+    std::unique_ptr<std::string> APP_ID;
 
     public:
     void Load(Json::Value&& data) override;

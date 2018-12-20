@@ -19,7 +19,9 @@ namespace DiscordHandlers
 
 std::string DiscordHandler::ID() { return "DISCORD-RPC"; }
 
-DiscordHandler::DiscordHandler() {}
+DiscordHandler::DiscordHandler() {
+    bUpdatable = true;
+}
 
 DiscordHandler::~DiscordHandler()
 {
@@ -28,7 +30,8 @@ DiscordHandler::~DiscordHandler()
 
 void DiscordHandler::Load(Json::Value&& data)
 {
-    APP_ID = const_cast<char*>(data["DISCORD_APP_ID"].asCString());
+    APP_ID = std::make_unique<std::string>(data["DISCORD_APP_ID"].asCString());
+    std::cout << *APP_ID << std::endl;
 }
 
 void DiscordHandler::Initialize()
@@ -43,7 +46,7 @@ void DiscordHandler::Initialize()
     handlers.joinRequest = DiscordHandlers::handleDiscordJoinRequest;
 
     // Discord_Initialize(const char* applicationId, DiscordEventHandlers* handlers, int autoRegister, const char* optionalSteamId)
-    Discord_Initialize(APP_ID, &handlers, 1, NULL);
+    Discord_Initialize(APP_ID->c_str(), &handlers, 1, NULL);
     std::cout << "DISCORD_INITIALISATION" << std::endl;
     UpdatePresence();
 }
