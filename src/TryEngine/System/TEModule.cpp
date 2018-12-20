@@ -22,7 +22,11 @@ void TEModuleHandler::LoadModules(Json::Value&& serializedModules)
             if(moduleInstance != nullptr)
             {
                 if(module.get("module-active", true).asBool())
+                {
                     m_activeModules.push_back(moduleInstance);
+                    if(moduleInstance->bUpdatable)
+                        m_updatableModules.push_back(moduleInstance);
+                }
                 Json::Value data = module["module-data"];
                 if(data)
                 {
@@ -35,7 +39,7 @@ void TEModuleHandler::LoadModules(Json::Value&& serializedModules)
 
 void TEModuleHandler::UpdateModules()
 {
-    for(std::shared_ptr<TEModule> module : m_activeModules)
+    for(std::shared_ptr<TEModule> module : m_updatableModules)
         module->Update();
 }
 

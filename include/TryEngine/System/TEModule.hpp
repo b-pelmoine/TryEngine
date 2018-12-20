@@ -10,10 +10,15 @@
 class TEModule
 {
     public:
+    TEModule(): bUpdatable(false) {};
     virtual ~TEModule() {};
-    virtual void Update() =0;
     virtual void Initialize() =0;
     virtual void Load(Json::Value&& data) =0;
+    virtual void Update() {};
+    protected:
+    bool bUpdatable;
+
+    friend class TEModuleHandler;
 };
 
 class TEModuleHandler
@@ -31,6 +36,7 @@ class TEModuleHandler
 
     private:
     std::vector<std::shared_ptr<TEModule>> m_activeModules;
+    std::vector<std::shared_ptr<TEModule>> m_updatableModules;
     std::map<std::string, std::shared_ptr<TEModule>> m_registeredModules;
 };
 
