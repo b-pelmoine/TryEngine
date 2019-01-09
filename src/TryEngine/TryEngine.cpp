@@ -16,22 +16,20 @@ m_moduleHandler(std::make_shared<TEModuleHandler>()),
 m_physics(nullptr), 
 m_resources(std::make_shared<TEResourceManager>()), 
 m_worldStream(nullptr), 
-bUseCustomConfig(false)
+bUseCustomConfig(false),
+m_GC_waitTime(10.0f),
+m_GC_lastOccurence(0.0f)
 {}
 
 void TryEngine::Launch(int argc, char** argv)
 {
+    RegisterDefaultCommands();
+
     //Register all user defined types
     m_definedTypes.RegisterAllComponents();
     m_definedTypes.RegisterAllSystems();
     m_definedTypes.RegisterAllModules(m_moduleHandler);
 
-    m_commands["world"] = [this](std::string arg) {
-        Load(TEWorldStream(std::move(arg)));
-    };
-    m_commands["config"] = [this](std::string arg) {
-        LoadConfigFromFile(arg);
-    };
     ParseArgs(argc, argv);
 
     //Init modules
@@ -41,7 +39,6 @@ void TryEngine::Launch(int argc, char** argv)
 
     Execute();
 }
-
 
 void TryEngine::Execute()
 {
@@ -59,6 +56,12 @@ void TryEngine::Execute()
         }
         m_windowHandler->PostUpdate();
         m_windowHandler->Draw();
+        
+        if(globalTime.Elapsed() - m_GC_lastOccurence > m_GC_waitTime)
+        {
+            m_GC_lastOccurence = globalTime.Elapsed();
+            m_resources->GC();
+        }
     }
 }
 
@@ -119,4 +122,31 @@ void TryEngine::LoadDefaultConfig()
     {
         m_windowHandler = std::make_shared<TEWindow>(TEWindowOptions());
     }
+}
+
+void TryEngine::RegisterCommand(std::string identifier, TECommand&& command)
+{
+    m_commands[identifier] = std::move(command);
+}
+
+void TryEngine::UnregisterCommand(std::string identifier)
+{
+    auto it = m_commands.find(identifier);
+    if(it != m_commands.end()) m_commands.erase (it);
+}
+
+void TryEngine::ExecCommand(std::string identifier, std::string arg)
+{
+    auto it = m_commands.find(identifier);
+    if(it != m_commands.end()) it->second(arg);
+}
+
+void TryEngine::RegisterDefaultCommands()
+{
+    m_commands["world"] = [this](std::string arg) {
+        Load(TEWorldStream(std::move(arg)));
+    };
+    m_commands["config"] = [this](std::string arg) {
+        LoadConfigFromFile(arg);
+    };
 }

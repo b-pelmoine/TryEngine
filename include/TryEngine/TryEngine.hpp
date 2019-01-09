@@ -20,6 +20,8 @@
 
 class TryEngine
 {
+    using TECommand = std::function<void(std::string)>;
+
     std::shared_ptr<TEWindow>           m_windowHandler;
     std::shared_ptr<TEModuleHandler>    m_moduleHandler;
     std::shared_ptr<TEPhysics>          m_physics;
@@ -28,14 +30,19 @@ class TryEngine
 
     UserDefinedTypes                    m_definedTypes;
 
-    std::map<std::string, std::function<void(std::string)>> m_commands;
+    std::map<std::string, TECommand>    m_commands;
     bool bUseCustomConfig;
+    float m_GC_waitTime;
+    float m_GC_lastOccurence;
 
     public:
     TryEngine();
 
     void Load(TEWorldStream&& stream);
     void Launch(int argc, char** argv);
+    void RegisterCommand(std::string identifier, TECommand&& command);
+    void UnregisterCommand(std::string identifier);
+    void ExecCommand(std::string identifier, std::string = "");
 
     std::weak_ptr<TEWindow>           Window() const            { return m_windowHandler; };
     std::weak_ptr<TEModuleHandler>    ModuleHandler() const     { return m_moduleHandler; };
@@ -52,6 +59,7 @@ class TryEngine
     void ParseArgs(int argc, char** argv);
     void LoadConfigFromFile(const std::string& path);
     void LoadDefaultConfig();
+    void RegisterDefaultCommands();
 };
 
 extern TryEngine TE;
