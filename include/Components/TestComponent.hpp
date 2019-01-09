@@ -5,6 +5,7 @@
 #include "SFML/System/Vector2.hpp"
 #include "SFML/Graphics.hpp"
 #include <iostream>
+#include "System/TEResourceManager.hpp"
 
 struct CTest : public TEComponent, public sf::Drawable {
     CTest() { std::cout << "used" << std::endl; }
@@ -22,6 +23,7 @@ struct CTest : public TEComponent, public sf::Drawable {
     
     public:
     sf::Vector2f position;
+    std::shared_ptr<TETexture> tex;
     float angle;
     virtual void Tranform(const sf::Transform& transform);
 };

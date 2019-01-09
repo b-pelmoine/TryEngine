@@ -27,7 +27,7 @@ void CTest::Load(Json::Value&& data)
     if(auto res = TE.Resources().lock())
     {
         texFile = data.get("tex", "").asString();
-        dynamic_cast<TETexture*>( res->Register(texFile, texFile, TEResource::Type::TEXTURE) );
+        res->Register(texFile, TEResource::Type::TEXTURE, texFile.c_str());
     }
 }
 
@@ -40,11 +40,11 @@ void CTest::Initialize()
             if(auto res = TE.Resources().lock())
             {
                 texFile = "Resources/gift.png";
-                dynamic_cast<TETexture*>( res->Register(texFile, texFile, TEResource::Type::TEXTURE) );
+                res->Register(texFile, TEResource::Type::TEXTURE, texFile.c_str());
             }
         }
-        auto& tex = res->GetTexture(texFile);
-        sprite.setTexture(tex.Get());
+        res->GetTexture(texFile, tex);
+        sprite.setTexture(tex->Get()); 
     }
     sprite.setOrigin(sprite.getGlobalBounds().width/2, sprite.getGlobalBounds().height/2);
     sprite.setPosition(position);
@@ -53,6 +53,7 @@ void CTest::Initialize()
 
 void CTest::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
+    //states.shader = &m_shader;
     target.draw(sprite, states);
 }
 
