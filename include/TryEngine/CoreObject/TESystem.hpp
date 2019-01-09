@@ -31,8 +31,8 @@ class TESystem : public TESerializableSystem
     virtual ~TESystem() {};
     virtual TESystemType Type() const =0;
     virtual TESystemID ID() const { return m_id; };
-    virtual bool CanTick() const { return bCanEverTick; }
     virtual void Tick() {};
+    virtual void Initialize() {};
     virtual void OnDestroy() =0;
 
     static std::unordered_map<TESystemType, std::function<std::weak_ptr<TESystem>(TESystemID)>> registeredSystems;
@@ -70,6 +70,7 @@ template<class S>
 TESystems<S>::TESystems(size_t size) {
     m_systems.reserve(size);
 }
+
 template<class S>
 std::weak_ptr<S> TESystems<S>::Create(bool overrideID, Json::LargestUInt ID) {
     Json::LargestUInt newID;
