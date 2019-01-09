@@ -1,48 +1,109 @@
 #include "System/TEResourceManager.hpp"
-#include <iostream>
+
 TEResourceManager::TEResourceManager()
+{}
+
+void TEResourceManager::Register(std::string resourceID, TEResource::Type type, std::string location)
 {
-    for(size_t i=0; i < static_cast<size_t>(TEResource::Type::_Count); ++i)
+    using T_ = TEResource::Type;
+    switch(type)
     {
-        m_resources.push_back(
-            std::map<std::string, std::unique_ptr<TEResource>>()
-        );
+        case T_::TEXTURE :  
+        {
+            auto it = m_textures.find(resourceID);
+            if(it != m_textures.end()) return;
+            m_textures[resourceID] = std::make_shared<TETexture>(location); 
+        }break;
+        case T_::SHADER :   
+        {
+            auto it = m_shaders.find(resourceID);
+            if(it != m_shaders.end()) return;
+            m_shaders[resourceID] = std::make_shared<TEShader>(location); 
+        }break;
+        case T_::SOUND :    
+        {
+            auto it = m_sounds.find(resourceID);
+            if(it != m_sounds.end()) return;
+            m_sounds[resourceID] = std::make_shared<TESound>(location); 
+        }break;
+        case T_::MUSIC :    
+        {
+            auto it = m_musics.find(resourceID);
+            if(it != m_musics.end()) return;
+            m_musics[resourceID] = std::make_shared<TEMusic>(location); 
+        }break;
+        default : break;
     }
 }
 
-TEResource* TEResourceManager::Register(std::string resourceID, std::string location, TEResource::Type type)
+void TEResourceManager::GetTexture  (std::string resourceID, std::shared_ptr<TETexture>& res)
 {
-    using T_ = TEResource::Type;
-    const size_t typeIndex = static_cast<size_t>(type);
+    res = m_textures[resourceID];
+    if(!res->Loaded()) 
     {
-        //check if already registered
-        auto it = m_resources[typeIndex].find(resourceID);
-        if(it != m_resources[typeIndex].end()) return it->second.get();
+        res->Load();
+        m_loadedTextures.push_back(resourceID);
     }
-    switch(type)
-    {
-        case T_::TEXTURE :  m_resources[typeIndex][resourceID] = std::make_unique<TETexture>(location); break;
-        case T_::SOUND :    m_resources[typeIndex][resourceID] = std::make_unique<TESound>(location); break;
-        case T_::MUSIC :    m_resources[typeIndex][resourceID] = std::make_unique<TEMusic>(location); break;
-        default : break;
+}
+
+void TEResourceManager::GetShader  (std::string resourceID, std::shared_ptr<TEShader>& res)
+{
+    res = m_shaders[resourceID];
+    if(!res->Loaded()) res->Load();
+}
+
+void TEResourceManager::GetSound   (std::string resourceID, std::shared_ptr<TESound>& res)
+{
+    res = m_sounds[resourceID];
+    if(!res->Loaded()) res->Load();
+}
+
+void TEResourceManager::GetMusic   (std::string resourceID, std::shared_ptr<TEMusic>& res)
+{
+    res = m_musics[resourceID];
+    if(!res->Loaded()) res->Load();
+}
+
+void TEResourceManager::GC()
+{
+    for(std::vector<std::string>::iterator it = m_loadedTextures.begin(); it != m_loadedTextures.end();)    
+    { 
+        if(m_textures[*it].unique())
+        {
+            m_textures[*it]->Free(); 
+            it = m_loadedTextures.erase(it);
+        }
+        else
+            ++it;
     }
-    return m_resources[typeIndex][resourceID].get();
-}
-const TETexture& TEResourceManager::GetTexture(std::string resourceID)
-{
-    TETexture& tex = dynamic_cast<TETexture&> (*m_resources[static_cast<size_t>(TEResource::Type::TEXTURE)][resourceID]);
-    if(!tex.Loaded()) tex.Load();
-    return tex;
-}
-const TESound& TEResourceManager::GetSound(std::string resourceID)
-{
-    TESound& snd = dynamic_cast<TESound&> (*m_resources[static_cast<size_t>(TEResource::Type::SOUND)][resourceID]);
-    if(!snd.Loaded()) snd.Load();
-    return snd;
-}
-const TEMusic& TEResourceManager::GetMusic(std::string resourceID)
-{
-    TEMusic& music = dynamic_cast<TEMusic&> (*m_resources[static_cast<size_t>(TEResource::Type::MUSIC)][resourceID]);
-    if(!music.Loaded()) music.Load();
-    return music;
+    for(std::vector<std::string>::iterator it = m_loadedShaders.begin(); it != m_loadedShaders.end();)    
+    { 
+        if(m_shaders[*it].unique())
+        {
+            m_shaders[*it]->Free(); 
+            it = m_loadedShaders.erase(it);
+        }
+        else
+            ++it;
+    }
+    for(std::vector<std::string>::iterator it = m_loadedSounds.begin(); it != m_loadedSounds.end();)    
+    { 
+        if(m_sounds[*it].unique())
+        {
+            m_sounds[*it]->Free(); 
+            it = m_loadedSounds.erase(it);
+        }
+        else
+            ++it;
+    }
+    for(std::vector<std::string>::iterator it = m_loadedMusics.begin(); it != m_loadedMusics.end();)    
+    { 
+        if(m_musics[*it].unique())
+        {
+            m_musics[*it]->Free(); 
+            it = m_loadedMusics.erase(it);
+        }
+        else
+            ++it;
+    }
 }
