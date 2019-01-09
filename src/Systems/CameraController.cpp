@@ -35,11 +35,12 @@ void SCameraController::Initialize()
 }
 
 void SCameraController::OnDestroy()
-{}
+{
+}
 
 void SCameraController::Tick()
 {
-    float elapsed = TE.tickTime.Get();
+    float elapsed = TE.tickTime();
     float speed = (m_inputs->IsInputTriggered("Shift")) ? m_FastSpeed : m_BaseSpeed;
     m_view.setCenter(m_view.getCenter() + sf::Vector2f(m_inputs->GetAxis("MoveRight")*elapsed*speed, m_inputs->GetAxis("MoveUp")*elapsed*speed));
     m_window->setView(m_view);
