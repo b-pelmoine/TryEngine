@@ -13,7 +13,10 @@ class TETime
     TETime();
     void Tick();
     sf::Time Raw() const { return m_tickTime; }
-    float Get() const { return m_tickTime.asSeconds(); };
+    sf::Clock Clock() const { return m_clock; }
+    float operator()() {
+        return m_tickTime.asSeconds();
+    }
     float Elapsed() const { return m_clock.getElapsedTime().asSeconds(); };
 };
 
