@@ -31,7 +31,6 @@ DiscordHandler::~DiscordHandler()
 void DiscordHandler::Load(Json::Value&& data)
 {
     APP_ID = std::make_unique<std::string>(data["DISCORD_APP_ID"].asCString());
-    std::cout << *APP_ID << std::endl;
 }
 
 void DiscordHandler::Initialize()
