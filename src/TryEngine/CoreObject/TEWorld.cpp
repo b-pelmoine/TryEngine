@@ -16,6 +16,12 @@ std::weak_ptr<TEEntities> TEWorld::Entities() noexcept
     return m_entities;
 }
 
+void TEWorld::Add(std::weak_ptr<TESystem> sys)
+{
+    sys.lock()->Initialize();
+    m_systems.push_back(sys);
+}
+
 void TEWorld::Load(TEEntities&& entities, Json::Value&& systems)
 {
     //entities
@@ -29,6 +35,7 @@ void TEWorld::Load(TEEntities&& entities, Json::Value&& systems)
     }
     //systems
     m_systems.clear();
+    m_tickableSystems.clear();
     if(systems.size() > 0)
     {
         TESystemType systemType;
@@ -46,7 +53,9 @@ void TEWorld::Load(TEEntities&& entities, Json::Value&& systems)
                 system = systems[index]["systems"][i];
                 id = system["system-id"].asLargestUInt();
                 m_systems.push_back(it->second(id));
-                std::prev(m_systems.end())->lock()->Load(std::move(system["data"]), m_entities);
+                auto sys = std::prev(m_systems.end())->lock();
+                sys->Load(std::move(system["data"]), m_entities);
+                m_tickableSystems.push_back(sys);
             }
         }
         auto init = [](auto& s){ s.lock()->Initialize(); };
@@ -58,14 +67,11 @@ void TEWorld::Load(TEEntities&& entities, Json::Value&& systems)
 
 void TEWorld::Update()
 {
-    for(auto& w_sys: m_systems)
+    for(auto& w_sys: m_tickableSystems)
     {
         if(const auto& sys = w_sys.lock())
         {
-            if(sys->CanTick())
-            {
-                sys->Tick();
-            }
+            sys->Tick();
         }
     }
     auto element = std :: remove_if (m_systems.begin(), m_systems.end() , [](const std::weak_ptr<TESystem>& w_sys){ return w_sys.expired(); });

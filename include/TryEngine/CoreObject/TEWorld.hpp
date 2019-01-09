@@ -9,12 +9,16 @@ class TEWorld
 {
 public:
     TEWorld();
-
+    
+    void Add(std::weak_ptr<TESystem>); 
+    
     std::weak_ptr<TEEntities> Entities() noexcept;
+
 private:
     bool bLoaded;
     std::shared_ptr<TEEntities> m_entities;
     std::vector<std::weak_ptr<TESystem>> m_systems;
+    std::vector<std::weak_ptr<TESystem>> m_tickableSystems;
     
     virtual void Load(TEEntities&& entities, Json::Value&& systems);
     void UnLoad();
