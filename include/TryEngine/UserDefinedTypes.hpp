@@ -13,9 +13,10 @@
 /*include all classes defining modules here*/
 #include "Modules/DiscordHandler.hpp"
 #include "Modules/InputRegister.hpp"
+#include "Modules/PerformanceAnalyser.hpp"
 
 #define SERIALIZE(system) std::for_each(TESystems<system>::m_systems.begin(), TESystems<system>::m_systems.end(), serialize); systems[typeCounter]["TypeId"] = system::TypeID; ++typeCounter;
-#define REGISTER_COMPONENT(component)   TEComponent::registeredComponents[component::TypeID] = [](std::weak_ptr<TEEntity> entity) { return TEComponents<component>::AddTo(entity); }; \
+#define REGISTER_COMPONENT(component)   TEComponent::registeredComponents[component::TypeID] = [](std::weak_ptr<TEEntity> entity) { return TEComponents<component>::AddTo(entity, true); }; \
                                         TECOMPONENT_REGISTER_DESTROYER(component)
 #define REGISTER_SYSTEM(system) TESystem::registeredSystems[system::TypeID] = [](TESystemID id) { return TESystems<system>::Create(id); }; \
                                         TESYSTEM_REGISTER_DESTROYER(system)
@@ -38,6 +39,7 @@ struct UserDefinedTypes
     {
         REGISTER_MODULE(DiscordHandler);
         REGISTER_MODULE(InputRegister);
+        REGISTER_MODULE(PerformanceAnalyser);
     }
 
     Json::Value SerializeAllSystems() const
