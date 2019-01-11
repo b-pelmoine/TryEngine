@@ -90,8 +90,13 @@ void TEWindow::Draw()
             m_window->draw(*(drawable.lock()));
         }
     }
+}
+
+void TEWindow::Display()
+{
     m_window->display();
 }
+
 void TEWindow::AddDrawable(std::shared_ptr<sf::Drawable> drawable, const Layer& layer)
 {
     m_drawables[layer].push_back(drawable);

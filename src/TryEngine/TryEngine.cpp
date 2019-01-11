@@ -46,7 +46,6 @@ void TryEngine::Execute()
     {
         tickTime.Tick();
         m_windowHandler->HandleEvents();
-        m_moduleHandler->UpdateModules();
         if(m_worldStream)
         {
             if(const auto& world = m_worldStream->GetWorld().lock())
@@ -56,6 +55,10 @@ void TryEngine::Execute()
         }
         m_windowHandler->PostUpdate();
         m_windowHandler->Draw();
+
+        m_moduleHandler->UpdateModules();
+
+        m_windowHandler->Display();
         
         if(globalTime.Elapsed() - m_GC_lastOccurence > m_GC_waitTime)
         {

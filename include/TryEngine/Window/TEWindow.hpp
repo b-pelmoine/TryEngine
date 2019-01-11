@@ -59,6 +59,7 @@ class TEWindow
     void HandleEvents();
     void PostUpdate();
     void Draw();
+    void Display();
 
     void Config(const TEWindowOptions& options);
     const TEWindowOptions& GetConfig() const { return m_options; }
