@@ -8,8 +8,8 @@
 #include "System/TEResourceManager.hpp"
 
 struct CTest : public TEComponent, public sf::Drawable {
-    CTest() { std::cout << "used" << std::endl; }
-    CTest(std::weak_ptr<TEEntity> e);
+    CTest() {}
+    CTest(std::weak_ptr<TEEntity> e, bool);
     virtual ~CTest();
     static const TEComponentType TypeID;
     virtual TEComponentType Type() const noexcept override { return CTest::TypeID; }
@@ -17,15 +17,12 @@ struct CTest : public TEComponent, public sf::Drawable {
     virtual void Load(Json::Value&& data) override;
     virtual void Initialize() override;
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-
-    sf::Sprite sprite;
-    std::string texFile;
+ 
+    std::shared_ptr<TETexture> tex;
+    std::shared_ptr<TEShader> shader;
     
     public:
-    sf::Vector2f position;
-    std::shared_ptr<TETexture> tex;
-    float angle;
-    virtual void Tranform(const sf::Transform& transform);
+    sf::Sprite sprite;
 };
 
 #endif
