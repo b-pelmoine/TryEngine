@@ -30,9 +30,9 @@ class TESystem : public TESerializableSystem
     TESystem(Json::LargestUInt ID): bCanEverTick(false), m_id(ID) {};
     virtual ~TESystem() {};
     virtual TESystemType Type() const =0;
-    virtual TESystemID ID() const { return m_id; };
-    virtual void Tick() {};
-    virtual void Initialize() {};
+    virtual TESystemID ID() const { return m_id; }
+    virtual void Tick() {}
+    virtual void Initialize() {}
     virtual void OnDestroy() =0;
 
     static std::unordered_map<TESystemType, std::function<std::weak_ptr<TESystem>(TESystemID)>> registeredSystems;

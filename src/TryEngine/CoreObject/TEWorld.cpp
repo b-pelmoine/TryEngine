@@ -26,13 +26,6 @@ void TEWorld::Load(TEEntities&& entities, Json::Value&& systems)
 {
     //entities
     m_entities = std::make_shared<TEEntities>(std::move(entities));
-    {
-        auto init = [](auto& c){ c.second.lock()->Initialize(); };
-        for(auto& entity: entities.m_entities)
-        {
-            std::for_each(entity->m_components.begin(), entity->m_components.end(), init);
-        }
-    }
     //systems
     m_systems.clear();
     m_tickableSystems.clear();
