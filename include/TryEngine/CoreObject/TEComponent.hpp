@@ -20,10 +20,12 @@ class TEComponent : public TESerializable
     static std::unordered_map<TEComponentType, std::function<void(std::weak_ptr<TEEntity>)>> componentsDestroyer;
 protected:
     TEComponent();
-    TEComponent(std::weak_ptr<TEEntity> e);
+    TEComponent(std::weak_ptr<TEEntity> e, bool loadedFromFile);
     virtual ~TEComponent() {};
+    bool bLoadedFromFile;
 public:
     std::weak_ptr<TEEntity> Owner() const;
+    virtual void Initialize() {}
     virtual TEComponentType Type() const noexcept =0;
 private:
     std::weak_ptr<TEEntity> m_entity;
@@ -40,7 +42,7 @@ template<class C>
 class TEComponents 
 {
 public:
-    static std::weak_ptr<C> AddTo(std::weak_ptr<TEEntity>& entity);
+    static std::weak_ptr<C> AddTo(std::weak_ptr<TEEntity>& entity, bool loading = false);
     static void RemoveFrom(std::weak_ptr<TEEntity> entity, bool deleteFromEntity = true);
 private: 
     TEComponents(size_t size = 1024);
@@ -56,7 +58,7 @@ TEComponents<C>::TEComponents(size_t size) {
 }
  
 template<class C>
-std::weak_ptr<C> TEComponents<C>::AddTo(std::weak_ptr<TEEntity>& entity) {
+std::weak_ptr<C> TEComponents<C>::AddTo(std::weak_ptr<TEEntity>& entity, bool loading) {
     assert(!entity.expired());
     
     auto it = std::find_if(m_components.begin(), m_components.end(), 
@@ -68,7 +70,7 @@ std::weak_ptr<C> TEComponents<C>::AddTo(std::weak_ptr<TEEntity>& entity) {
     }
     else
     {
-        m_components.emplace_back(std::make_shared<C>(C(entity)));
+        m_components.emplace_back(std::make_shared<C>(C(entity, loading)));
         auto comp = m_components.back();
         entity.lock()->AddComponent(comp);
         return comp;
