@@ -119,7 +119,7 @@ struct TEShader: public TEResource
                 else m_state = State::LOADED;
             };
     }
-    const sf::Shader& Get() const { return *m_shader; }
+    sf::Shader& Get() const { return *m_shader; }
 };
 
 struct TESound: public TEResource
