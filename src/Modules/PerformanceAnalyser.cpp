@@ -23,6 +23,16 @@ void PerformanceAnalyser::Load(Json::Value&& data)
 void PerformanceAnalyser::Initialize()
 {
     m_lastFPSUpdate = 0.0f;
+    if(auto res = TE.Resources().lock())
+    {
+        res->Register("post", TEResource::Type::SHADER, "Resources/shader/postprocess.frag");
+        std::shared_ptr<TEShader> test;
+        res->GetShader("post", test);
+        test->Configure("Resources/shader/postprocess.frag", sf::Shader::Type::Fragment);
+        test->Load();
+        test->Get().setUniform("texture", sf::Shader::CurrentTexture);
+        TE.Window().lock()->ConfigurePostProcess("post");
+    }
 }
 
 void PerformanceAnalyser::Update() 
@@ -39,7 +49,7 @@ void PerformanceAnalyser::Update()
         ss << static_cast<unsigned int>(m_averageFPS) << " FPS";
         m_fps.setString(ss.str());
     }
-    auto render = TE.Window().lock()->GetRender();
+    auto render = TE.Window().lock()->GetRenderWindow();
     sf::View t_view = render->getView();
     sf::View view = render->getDefaultView();
     render->setView(view);
