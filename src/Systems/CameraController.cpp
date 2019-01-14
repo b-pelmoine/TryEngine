@@ -18,12 +18,22 @@ Json::Value SCameraController::Serialize() const
 {
     Json::Value sys;
     sys["zoom-offset"] = m_zoomOffset;
+    sys["position"]["x"] = m_view.getCenter().x;
+    sys["position"]["y"] = m_view.getCenter().y;
+    sys["zoom"] = m_currentZoom;
     return sys;
 }
 
 void SCameraController::Load(Json::Value&& data, std::shared_ptr<TEEntities> entities __attribute__((unused)))
 {
     m_zoomOffset = data["zoom-offset"].asFloat();
+    m_currentZoom = data.get("zoom", 1.0f).asFloat();
+    m_view.zoom(m_currentZoom);
+    auto pos = data["position"];
+    if(pos)
+    {
+        m_view.setCenter(pos.get("x", 0).asFloat(), pos.get("y", 0).asFloat());
+    }
 }
 
 void SCameraController::Initialize()
