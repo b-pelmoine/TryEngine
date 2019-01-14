@@ -32,8 +32,6 @@ void TEWorld::Load(TEEntities&& entities, Json::Value&& systems)
     if(systems.size() > 0)
     {
         TESystemType systemType;
-        TESystemID id;
-        Json::Value system;
         const size_t typeCount = systems.size();
         m_systems.reserve(typeCount);
         for ( Json::Value::ArrayIndex index = 0; index < typeCount; ++index )
@@ -43,11 +41,9 @@ void TEWorld::Load(TEEntities&& entities, Json::Value&& systems)
             auto it = TESystem::registeredSystems.find(systemType);
             for ( Json::Value::ArrayIndex i = 0; i < systemCount; ++i )
             {
-                system = systems[index]["systems"][i];
-                id = system["system-id"].asLargestUInt();
-                m_systems.push_back(it->second(id));
+                m_systems.push_back(it->second(i));
                 auto sys = std::prev(m_systems.end())->lock();
-                sys->Load(std::move(system["data"]), m_entities);
+                sys->Load(std::move(systems[index]["systems"][i]), m_entities);
                 m_tickableSystems.push_back(sys);
             }
         }

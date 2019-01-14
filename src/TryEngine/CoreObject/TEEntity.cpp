@@ -30,18 +30,13 @@ void TEEntity::RemoveComponent(std::weak_ptr<TEComponent> component)
 
 Json::Value TEEntity::Serialize() const
 {
-    Json::Value entity;
-    entity["entity-id"] = m_id;
-    { 
-        Json::Value components(Json::arrayValue);
-        Json::ArrayIndex compCounter = 0;
-        for(const auto& component : m_components)
-        {
-            components[compCounter]["TypeId"] = component.second.lock()->Type();
-            components[compCounter]["data"] = component.second.lock()->Serialize();
-            ++compCounter;
-        }
-        entity["components"] = components;
+    Json::Value entity(Json::arrayValue);
+    Json::ArrayIndex compCounter = 0;
+    for(const auto& component : m_components)
+    {
+        entity[compCounter]["TypeId"] = component.second.lock()->Type();
+        entity[compCounter]["data"] = component.second.lock()->Serialize();
+        ++compCounter;
     }
     return entity;
 }
@@ -89,10 +84,10 @@ void TEEntities::Remove(std::weak_ptr<TEEntity> entity) {
 
 void TEEntities::Load(Json::Value&& rawEntities)
 {
-    for(auto& rawEntity : rawEntities)
+    for ( Json::Value::ArrayIndex i = 0; i < rawEntities.size(); ++i )
     {
-        auto entity = TEEntities::Create(true, rawEntity["entity-id"].asLargestUInt());
-        entity.lock()->Load(std::move(rawEntity["components"]), entity);
+        auto entity = TEEntities::Create(true, i);
+        entity.lock()->Load(std::move(rawEntities[i]), entity);
     }
 }
 

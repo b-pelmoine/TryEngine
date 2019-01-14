@@ -15,7 +15,10 @@
 #include "Modules/InputRegister.hpp"
 #include "Modules/PerformanceAnalyser.hpp"
 
-#define SERIALIZE(system) std::for_each(TESystems<system>::m_systems.begin(), TESystems<system>::m_systems.end(), serialize); systems[typeCounter]["TypeId"] = system::TypeID; ++typeCounter;
+#define SERIALIZE(system)   if(!TESystems<system>::m_systems.empty()) { \
+                                std::for_each(TESystems<system>::m_systems.begin(), TESystems<system>::m_systems.end(), serialize); systems[typeCounter]["TypeId"] = system::TypeID;\
+                                ++typeCounter; sysCounter = 0; \
+                            }
 #define REGISTER_COMPONENT(component)   TEComponent::registeredComponents[component::TypeID] = [](std::weak_ptr<TEEntity> entity) { return TEComponents<component>::AddTo(entity, true); }; \
                                         TECOMPONENT_REGISTER_DESTROYER(component)
 #define REGISTER_SYSTEM(system) TESystem::registeredSystems[system::TypeID] = [](TESystemID id) { return TESystems<system>::Create(id); }; \
@@ -48,11 +51,11 @@ struct UserDefinedTypes
         Json::ArrayIndex sysCounter = 0;
         Json::ArrayIndex typeCounter = 0;
         auto serialize = [&](auto& s){ 
-            systems[typeCounter]["systems"][sysCounter]["data"] = s->Serialize();
-            systems[typeCounter]["systems"][sysCounter]["system-id"] = s->ID();
+            systems[typeCounter]["systems"][sysCounter] = s->Serialize();
             ++sysCounter;
         };
         {
+            SERIALIZE(SCameraController)
             SERIALIZE(STest)
         }
         return systems;
