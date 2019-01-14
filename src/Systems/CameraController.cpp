@@ -38,8 +38,8 @@ void SCameraController::Load(Json::Value&& data, std::shared_ptr<TEEntities> ent
 
 void SCameraController::Initialize()
 {
-    m_window = TE.Window().lock()->GetRender();
-    m_window->setView(m_view);
+    m_tex = TE.Window().lock()->GetRenderTexture();
+    m_tex->setView(m_view);
     m_inputs = TE.Window().lock()->Inputs().lock();
 
     if(const auto& window = TE.Window().lock())
@@ -51,18 +51,18 @@ void SCameraController::Initialize()
                 {
                     float zoomFactor = event.mouseWheelScroll.delta * m_zoomOffset;
                     m_currentZoom *= 1 + zoomFactor;
-                    ZoomViewAt({ event.mouseWheelScroll.x, event.mouseWheelScroll.y }, *m_window, 1 + zoomFactor);
+                    ZoomViewAt({ event.mouseWheelScroll.x, event.mouseWheelScroll.y }, *m_tex, 1 + zoomFactor);
                 }
             });
-            TEInputListener panDown = [this, inputs](const sf::Event& e_ __attribute__((unused))){ 
+            TEInputListener panDown = [this, inputs, window](const sf::Event& e_ __attribute__((unused))){ 
                 inputs->RemoveListener("PanDown", panDownID);
-                m_lastPanPos = m_window->mapPixelToCoords(sf::Mouse::getPosition(*m_window));
-                movingID = inputs->AddListener("MouseMoved", [this, inputs](const sf::Event& e_ __attribute__((unused))){ 
-                    auto newPos =  m_window->mapPixelToCoords(sf::Mouse::getPosition(*m_window));
+                m_lastPanPos = m_tex->mapPixelToCoords(sf::Mouse::getPosition());
+                movingID = inputs->AddListener("MouseMoved", [this, inputs, window](const sf::Event& e_ __attribute__((unused))){ 
+                    auto newPos =  m_tex->mapPixelToCoords(sf::Mouse::getPosition());
                     auto delta = m_lastPanPos - newPos;
                     m_lastPanPos = newPos + delta;
                     m_view.move(delta);
-                    m_window->setView(m_view);
+                    m_tex->setView(m_view);
                 });
             };
             panDownID = inputs->AddListener("PanDown", panDown);
@@ -74,17 +74,17 @@ void SCameraController::Initialize()
     }
 }
 
-void SCameraController::ZoomViewAt(sf::Vector2i pixel, sf::RenderWindow& window, float zoom)
+void SCameraController::ZoomViewAt(sf::Vector2i pixel, sf::RenderTexture& tex, float zoom)
 {
-	const sf::Vector2f beforeCoord{ window.mapPixelToCoords(pixel) };
-	sf::View view{ window.getView() };
+	const sf::Vector2f beforeCoord{ tex.mapPixelToCoords(pixel) };
+	sf::View view{ tex.getView() };
 	view.zoom(zoom);
-	window.setView(view);
-	const sf::Vector2f afterCoord{ window.mapPixelToCoords(pixel) };
+	tex.setView(view);
+	const sf::Vector2f afterCoord{ tex.mapPixelToCoords(pixel) };
 	const sf::Vector2f offsetCoords{ beforeCoord - afterCoord };
 	view.move(offsetCoords);
-	window.setView(view);
-    m_view = window.getView();
+	tex.setView(view);
+    m_view = tex.getView();
 }
 
 void SCameraController::OnDestroy()

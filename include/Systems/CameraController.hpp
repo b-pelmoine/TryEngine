@@ -1,10 +1,13 @@
 #ifndef TERO_SYS_CAMERACONTROLLER_HPP
 #define TERO_SYS_CAMERACONTROLLER_HPP
 
-#include "CoreMinimal.hpp"
-#include "SFML/Graphics/View.hpp"
 #include <memory>
+
+#include "CoreMinimal.hpp"
 #include "Window/TEInput.hpp"
+
+#include <SFML/Graphics/View.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
 
 class SCameraController : public TESystem {
 public: 
@@ -20,10 +23,10 @@ public:
 private: 
     SCameraController(): TESystem(0) {}
 
-    void ZoomViewAt(sf::Vector2i pixel, sf::RenderWindow& window, float zoom);
+    void ZoomViewAt(sf::Vector2i pixel, sf::RenderTexture& window, float zoom);
 
     sf::View m_view;
-    std::shared_ptr<sf::RenderWindow> m_window;
+    std::shared_ptr<sf::RenderTexture> m_tex;
     std::shared_ptr<TEInput> m_inputs;
     sf::Vector2f m_lastPanPos;
     float m_zoomOffset;
