@@ -5,9 +5,12 @@
 #include <string>
 
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include "TEInput.hpp"
 #include <json/json.h>
+
+#include <System/TEResourceManager.hpp>
 
 struct TEWindowOptions
 {
@@ -52,7 +55,7 @@ struct TEWindowOptions
 class TEWindow
 {
     public:
-    enum class Layer { BG, MID, FG, UI, _Count };
+    enum class Layer { BG, MID, FG, InGameUI, _Count };
     TEWindow(TEWindowOptions&& options);
     TEWindow(std::shared_ptr<sf::RenderWindow> window);
 
@@ -61,9 +64,12 @@ class TEWindow
     void Draw();
     void Display();
 
+    void ConfigurePostProcess(const std::string&);
+
     void Config(const TEWindowOptions& options);
     const TEWindowOptions& GetConfig() const { return m_options; }
-    const std::shared_ptr<sf::RenderWindow>& GetRender() const { return m_window; }
+    const std::shared_ptr<sf::RenderWindow>& GetRenderWindow() const { return m_window; }
+    const std::shared_ptr<sf::RenderTexture>& GetRenderTexture() const { return m_texture; }
     bool Active() const { return m_active; }
     std::weak_ptr<TEInput> Inputs() const { return m_input; }
 
@@ -75,10 +81,13 @@ class TEWindow
     void ApplyConfig();
 
     TEWindowOptions m_options;
-    std::shared_ptr<sf::RenderWindow> m_window;
+    std::shared_ptr<sf::RenderWindow>   m_window;
+    std::shared_ptr<sf::RenderTexture>  m_texture;
     std::shared_ptr<TEInput> m_input;
+    std::shared_ptr<TEShader> m_postProcessShader;
     
     bool m_active;
+    bool bUsePostProcess;
 
     std::map<Layer, std::vector<std::weak_ptr<sf::Drawable>>> m_drawables;
 };

@@ -1,10 +1,12 @@
 #include "TryEngine/Window/TEWindow.hpp"
 
+#include <TryEngine.hpp>
+
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics.hpp>
 
 TEWindow::TEWindow(TEWindowOptions&& options) : 
-m_options(options), m_input(std::make_shared<TEInput>()), m_active(false)
+m_options(options), m_texture(std::make_shared<sf::RenderTexture>()), m_input(std::make_shared<TEInput>()), m_active(false), bUsePostProcess(false)
 {
     for(size_t i=0; i < static_cast<size_t>(Layer::_Count); ++i)
     {
@@ -14,13 +16,21 @@ m_options(options), m_input(std::make_shared<TEInput>()), m_active(false)
 }
 
 TEWindow::TEWindow(std::shared_ptr<sf::RenderWindow> window) : 
-m_window(window), m_input(std::make_shared<TEInput>()), m_active(true)
+m_window(window), m_texture(std::make_shared<sf::RenderTexture>()), m_input(std::make_shared<TEInput>()), m_active(true), bUsePostProcess(true)
 {
     for(size_t i=0; i < static_cast<size_t>(Layer::_Count); ++i)
     {
         m_drawables[static_cast<Layer>(i)] = std::vector<std::weak_ptr<sf::Drawable>>();
     }
     SaveCurrentConfig();
+    m_texture->create(m_options.size.x, m_options.size.y);
+}
+
+void TEWindow::ConfigurePostProcess(const std::string& shaderID)
+{
+    bUsePostProcess = !shaderID.empty();
+    if(bUsePostProcess)
+        TE.Resources().lock()->GetShader(shaderID, m_postProcessShader);
 }
 
 void TEWindow::Config(const TEWindowOptions& options)
@@ -60,6 +70,8 @@ void TEWindow::ApplyConfig()
     }
     m_active = true;
 
+    m_texture->create(m_options.size.x, m_options.size.y);
+
     m_window->setPosition(m_options.position);
 }
 
@@ -82,13 +94,24 @@ void TEWindow::PostUpdate()
 
 void TEWindow::Draw()
 {
-    m_window->clear(sf::Color::Black);
+    m_texture->clear(sf::Color::Blue);
     for(const auto& layer: m_drawables)
     {
         for(const auto& drawable: layer.second)
         {
-            m_window->draw(*(drawable.lock()));
+            m_texture->draw(*(drawable.lock()));
         }
+    }
+    m_texture->display();
+    m_window->clear(sf::Color::Black);
+    sf::Sprite processedPicture(m_texture->getTexture());
+    if(bUsePostProcess)
+    {
+        m_window->draw(processedPicture, &m_postProcessShader->Get());
+    }
+    else
+    {
+        m_window->draw(processedPicture);
     }
 }
 
