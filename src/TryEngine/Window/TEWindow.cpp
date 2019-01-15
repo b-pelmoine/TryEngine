@@ -23,7 +23,7 @@ m_window(window), m_texture(std::make_shared<sf::RenderTexture>()), m_input(std:
         m_drawables[static_cast<Layer>(i)] = std::vector<std::weak_ptr<sf::Drawable>>();
     }
     SaveCurrentConfig();
-    m_texture->create(m_options.size.x, m_options.size.y);
+    InitializeRenderTexture();
 }
 
 void TEWindow::ConfigurePostProcess(const std::string& shaderID)
@@ -70,9 +70,22 @@ void TEWindow::ApplyConfig()
     }
     m_active = true;
 
-    m_texture->create(m_options.size.x, m_options.size.y);
+    InitializeRenderTexture();
 
     m_window->setPosition(m_options.position);
+}
+
+void TEWindow::InitializeRenderTexture()
+{
+    if(m_options.style == sf::Style::Fullscreen)
+    {
+        auto size = m_window->getSize();
+        m_texture->create(size.x, size.y);
+    }
+    else
+    {
+        m_texture->create(m_options.size.x, m_options.size.y);
+    }
 }
 
 void TEWindow::HandleEvents()

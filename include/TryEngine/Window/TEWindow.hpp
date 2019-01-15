@@ -79,6 +79,7 @@ class TEWindow
     private:
     void SaveCurrentConfig();
     void ApplyConfig();
+    void InitializeRenderTexture();
 
     TEWindowOptions m_options;
     std::shared_ptr<sf::RenderWindow>   m_window;
