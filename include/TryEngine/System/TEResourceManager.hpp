@@ -162,6 +162,17 @@ struct TEMusic: public TEResource
     const sf::Music& Get() const { return *m_music; }
 };
 
+#define __GC(loadedResourceType, resourceMap) for(std::vector<std::string>::iterator it = loadedResourceType.begin(); it != loadedResourceType.end();)    \
+                    { \
+                        if(resourceMap[*it].unique()) \
+                        { \
+                            resourceMap[*it]->Free(); \
+                            it = loadedResourceType.erase(it); \
+                        } \
+                        else \
+                            ++it;\
+                    }
+
 class TEResourceManager
 {
     public:

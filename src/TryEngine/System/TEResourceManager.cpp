@@ -66,44 +66,8 @@ void TEResourceManager::GetMusic   (std::string resourceID, std::shared_ptr<TEMu
 
 void TEResourceManager::GC()
 {
-    for(std::vector<std::string>::iterator it = m_loadedTextures.begin(); it != m_loadedTextures.end();)    
-    { 
-        if(m_textures[*it].unique())
-        {
-            m_textures[*it]->Free(); 
-            it = m_loadedTextures.erase(it);
-        }
-        else
-            ++it;
-    }
-    for(std::vector<std::string>::iterator it = m_loadedShaders.begin(); it != m_loadedShaders.end();)    
-    { 
-        if(m_shaders[*it].unique())
-        {
-            m_shaders[*it]->Free(); 
-            it = m_loadedShaders.erase(it);
-        }
-        else
-            ++it;
-    }
-    for(std::vector<std::string>::iterator it = m_loadedSounds.begin(); it != m_loadedSounds.end();)    
-    { 
-        if(m_sounds[*it].unique())
-        {
-            m_sounds[*it]->Free(); 
-            it = m_loadedSounds.erase(it);
-        }
-        else
-            ++it;
-    }
-    for(std::vector<std::string>::iterator it = m_loadedMusics.begin(); it != m_loadedMusics.end();)    
-    { 
-        if(m_musics[*it].unique())
-        {
-            m_musics[*it]->Free(); 
-            it = m_loadedMusics.erase(it);
-        }
-        else
-            ++it;
-    }
+    __GC(m_loadedTextures,  m_textures)
+    __GC(m_loadedShaders,   m_shaders)
+    __GC(m_loadedSounds,    m_sounds)
+    __GC(m_loadedMusics,    m_musics)
 }
