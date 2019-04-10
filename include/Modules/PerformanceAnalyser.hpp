@@ -29,7 +29,7 @@ class PerformanceAnalyser : public TEModule
     void UpdateMinMaxFPS();
 
     sf::Font m_font;
-    sf::Text m_fps;
+    sf::Text m_fps, m_fpsmin, m_fpsmax;
     float m_averageFPS;
     float m_lastFPSUpdate;
     float m_FPSRefreshRate;

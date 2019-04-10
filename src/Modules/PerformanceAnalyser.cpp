@@ -19,6 +19,14 @@ void PerformanceAnalyser::Load(Json::Value&& data)
     m_fps.setPosition(5.0f,0.0f);
     m_fps.setCharacterSize(32);
     m_fps.setStyle(sf::Text::Regular);
+    
+    m_fpsmin.setFont(m_font);
+    m_fpsmin.setPosition(50.f,900.f);
+    m_fpsmin.setCharacterSize(50);
+
+    m_fpsmax.setFont(m_font);
+    m_fpsmax.setPosition(50.f,50.f);
+    m_fpsmax.setCharacterSize(50);
 }
 
 void PerformanceAnalyser::Initialize()
@@ -70,9 +78,21 @@ void PerformanceAnalyser::Update()
     if(TE.globalTime.Elapsed() - m_lastFPSUpdate > m_FPSRefreshRate)
     {
         m_lastFPSUpdate = TE.globalTime.Elapsed();
-        std::stringstream ss;
-        ss << static_cast<unsigned int>(m_averageFPS) << " FPS";
-        m_fps.setString(ss.str());
+        {
+            std::stringstream ss;
+            ss << static_cast<unsigned int>(m_averageFPS) << " FPS";
+            m_fps.setString(ss.str());
+        }
+        {
+            std::stringstream ss;
+            ss << static_cast<unsigned int>(m_minFPS);
+            m_fpsmin.setString(ss.str());
+        }
+        {
+            std::stringstream ss;
+            ss << static_cast<unsigned int>(m_maxFPS);
+            m_fpsmax.setString(ss.str());
+        }
         UpdateFPSgraph();
     }
     Draw();
@@ -84,13 +104,18 @@ void PerformanceAnalyser::Draw()
     sf::View t_view = render->getView();
     render->setView(render->getDefaultView());
     render->draw(m_fps);
-    sf::View fpsview({0.5f, 0.5f}, {1.1f, 1.1f});
+    sf::View fpsview({0.5f, 0.5f}, {1.01f, 1.01f});
     fpsview.setViewport(sf::FloatRect(0.70f, 0.05f, 0.25f, 0.25f));
     render->setView(fpsview);
     render->draw(&m_FPSvertices[0], m_currentVertex, sf::LineStrip);
     const auto count = m_FPSvertices.size() - (m_currentVertex);
     render->draw(&m_FPSvertices[m_currentVertex], count, sf::LineStrip);
     render->draw(m_FPS_UI);
+    fpsview.setSize({1000.f,1000.f});
+    fpsview.setCenter({500.f, 500.f});
+    render->setView(fpsview);
+    render->draw(m_fpsmin);
+    render->draw(m_fpsmax);
     render->setView(t_view);
 }
 
